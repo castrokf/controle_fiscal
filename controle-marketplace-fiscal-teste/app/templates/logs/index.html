@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% from "orders/macros.html" import status_badge %}
+{% block page_title %}Logs{% endblock %}
+{% block content %}
+<div class="section-header">
+  <div>
+    <h1 class="section-title">Logs e auditoria</h1>
+    <div class="section-subtitle">Historico tecnico das acoes executadas no ambiente de teste.</div>
+  </div>
+</div>
+
+<div class="panel filter-panel">
+  <form method="get" class="row g-3 align-items-end">
+    <div class="col-md-4">
+      <label class="form-label">Acao</label>
+      <input class="form-control" name="action" value="{{ request.args.get('action', '') }}" placeholder="invoice.issue_fake">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Status</label>
+      <select class="form-select" name="status">
+        <option value="">Todos</option>
+        <option value="OK" {{ 'selected' if request.args.get('status') == 'OK' else '' }}>OK</option>
+        <option value="ERRO" {{ 'selected' if request.args.get('status') == 'ERRO' else '' }}>ERRO</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Entidade</label>
+      <input class="form-control" name="entity_type" value="{{ request.args.get('entity_type', '') }}" placeholder="invoice">
+    </div>
+    <div class="col-md-2 actions">
+      <button class="btn btn-primary" type="submit"><i class="bi bi-funnel"></i> Filtrar</button>
+      <a class="btn btn-outline-secondary" href="{{ url_for('logs.index') }}"><i class="bi bi-arrow-counterclockwise"></i> Limpar</a>
+    </div>
+  </form>
+</div>
+
+<div class="panel p-3 p-md-4">
+  <div class="panel-header">
+    <div>
+      <h2 class="section-title">Eventos registrados</h2>
+      <div class="section-subtitle">{{ logs|length }} log(s) encontrado(s).</div>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>Data/hora</th>
+          <th>Usuario</th>
+          <th>Acao</th>
+          <th>Status</th>
+          <th>Mensagem</th>
+          <th>Entidade</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+          <tr>
+            <td>{{ log.created_at|datetime_br }}</td>
+            <td>{{ log.user.name if log.user else 'Sistema' }}</td>
+            <td><code class="code-soft">{{ log.action }}</code></td>
+            <td>{{ status_badge(log.status) }}</td>
+            <td class="break-message">{{ log.message or '-' }}</td>
+            <td>{{ log.entity_type or '-' }}{% if log.entity_id %} <span class="text-muted-small">#{{ log.entity_id }}</span>{% endif %}</td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="6">
+              <div class="empty-state">
+                <i class="bi bi-journal-x"></i>
+                <strong>Nenhum log registrado.</strong>
+                <span>As acoes do sistema aparecerao aqui para auditoria.</span>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

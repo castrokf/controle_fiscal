@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% from "orders/macros.html" import status_badge %}
+{% block page_title %}Pedidos{% endblock %}
+{% block content %}
+<div class="section-header">
+  <div>
+    <h1 class="section-title">Pedidos centralizados</h1>
+    <div class="section-subtitle">Consulte pedidos ficticios Amazon e Shopee com filtros por data, horario, SKU e status.</div>
+  </div>
+</div>
+
+<div class="panel filter-panel">
+  <form method="get">
+    <div class="filter-grid">
+      <div>
+        <label class="form-label">Marketplace</label>
+        <select class="form-select" name="marketplace">
+          <option value="">Todos</option>
+          <option value="Amazon" {{ 'selected' if filters.get('marketplace') == 'Amazon' else '' }}>Amazon</option>
+          <option value="Shopee" {{ 'selected' if filters.get('marketplace') == 'Shopee' else '' }}>Shopee</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Data inicial</label>
+        <input class="form-control" type="date" name="date_start" value="{{ filters.get('date_start', '') }}">
+      </div>
+      <div>
+        <label class="form-label">Data final</label>
+        <input class="form-control" type="date" name="date_end" value="{{ filters.get('date_end', '') }}">
+      </div>
+      <div>
+        <label class="form-label">Horario inicial</label>
+        <input class="form-control" type="time" name="time_start" value="{{ filters.get('time_start', '') }}">
+      </div>
+      <div>
+        <label class="form-label">Horario final</label>
+        <input class="form-control" type="time" name="time_end" value="{{ filters.get('time_end', '') }}">
+      </div>
+      <div>
+        <label class="form-label">Status pedido</label>
+        <input class="form-control" name="order_status" value="{{ filters.get('order_status', '') }}" placeholder="PAGO">
+      </div>
+      <div>
+        <label class="form-label">Status fiscal</label>
+        <input class="form-control" name="fiscal_status" value="{{ filters.get('fiscal_status', '') }}" placeholder="SEM_NFE">
+      </div>
+      <div>
+        <label class="form-label">SKU</label>
+        <input class="form-control" name="sku" value="{{ filters.get('sku', '') }}" placeholder="SKU-FICT-001">
+      </div>
+      <div>
+        <label class="form-label">Cliente ficticio</label>
+        <input class="form-control" name="buyer" value="{{ filters.get('buyer', '') }}" placeholder="Nome do cliente">
+      </div>
+      <div>
+        <label class="form-label">Numero do pedido</label>
+        <input class="form-control" name="order_number" value="{{ filters.get('order_number', '') }}" placeholder="AMZ ou SHP">
+      </div>
+    </div>
+    <div class="actions mt-3">
+      <button class="btn btn-primary" type="submit"><i class="bi bi-funnel"></i> Filtrar</button>
+      <a class="btn btn-outline-secondary" href="{{ url_for('orders.index') }}"><i class="bi bi-arrow-counterclockwise"></i> Limpar</a>
+    </div>
+  </form>
+</div>
+
+<div class="panel p-3 p-md-4">
+  <div class="panel-header">
+    <div>
+      <h2 class="section-title">Resultado da consulta</h2>
+      <div class="section-subtitle">{{ orders|length }} pedido(s) encontrado(s).</div>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>Data/hora</th>
+          <th>Marketplace</th>
+          <th>Pedido</th>
+          <th>Cliente</th>
+          <th>Valor total</th>
+          <th>Status pedido</th>
+          <th>Status fiscal</th>
+          <th>Acoes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+          <tr>
+            <td>{{ order.order_datetime|datetime_br }}</td>
+            <td><span class="status-badge status-primary"><i class="bi bi-shop"></i>{{ order.marketplace }}</span></td>
+            <td><strong>{{ order.marketplace_order_id }}</strong></td>
+            <td>{{ order.buyer.name if order.buyer else '-' }}</td>
+            <td><strong>{{ order.total_amount|money_br }}</strong></td>
+            <td>{{ status_badge(order.order_status) }}</td>
+            <td>{{ status_badge(order.fiscal_status) }}</td>
+            <td><a class="btn btn-sm btn-outline-primary" href="{{ url_for('orders.detail', order_id=order.id) }}"><i class="bi bi-eye"></i> Detalhes</a></td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="8">
+              <div class="empty-state">
+                <i class="bi bi-search"></i>
+                <strong>Nenhum pedido encontrado para os filtros selecionados.</strong>
+                <span>Ajuste os filtros ou gere pedidos ficticios em Configuracoes.</span>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

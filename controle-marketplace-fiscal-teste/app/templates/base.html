@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Controle Marketplace Fiscal{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/app.css') }}" rel="stylesheet">
+  </head>
+  <body>
+    {% if current_user.is_authenticated %}
+      <div class="layout">
+        <aside class="sidebar">
+          <div class="brand">
+            <div class="brand-row">
+              <div class="brand-icon"><i class="bi bi-receipt-cutoff"></i></div>
+              <div>
+                <div class="brand-title">Controle Marketplace Fiscal</div>
+                <div class="brand-subtitle">Painel operacional de teste</div>
+              </div>
+            </div>
+            <div class="env-badge"><i class="bi bi-shield-check"></i> Ambiente de Teste</div>
+            <div class="sidebar-note">Dados ficticios. Nenhuma NF-e real e emitida, nenhuma API real e chamada.</div>
+          </div>
+          {% set endpoint = request.endpoint or '' %}
+          <nav class="nav flex-column">
+            <a class="nav-link {{ 'active' if endpoint.startswith('dashboard.') else '' }}" href="{{ url_for('dashboard.index') }}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            <a class="nav-link {{ 'active' if endpoint.startswith('orders.') else '' }}" href="{{ url_for('orders.index') }}"><i class="bi bi-bag-check"></i> Pedidos</a>
+            <a class="nav-link {{ 'active' if endpoint.startswith('products.') else '' }}" href="{{ url_for('products.index') }}"><i class="bi bi-box-seam"></i> Produtos</a>
+            <a class="nav-link {{ 'active' if endpoint.startswith('fiscal.') else '' }}" href="{{ url_for('fiscal.index') }}"><i class="bi bi-file-earmark-text"></i> Fiscal Simulado</a>
+            <a class="nav-link {{ 'active' if endpoint.startswith('reports.') else '' }}" href="{{ url_for('reports.index') }}"><i class="bi bi-bar-chart-line"></i> Relatorios</a>
+            <a class="nav-link {{ 'active' if endpoint.startswith('closing.') else '' }}" href="{{ url_for('closing.index') }}"><i class="bi bi-calendar2-check"></i> Fechamento Diario</a>
+            <a class="nav-link {{ 'active' if endpoint.startswith('logs.') else '' }}" href="{{ url_for('logs.index') }}"><i class="bi bi-clock-history"></i> Logs</a>
+            <a class="nav-link {{ 'active' if endpoint.startswith('settings.') else '' }}" href="{{ url_for('settings.index') }}"><i class="bi bi-sliders"></i> Configuracoes</a>
+          </nav>
+        </aside>
+        <main class="main">
+          <div class="topbar">
+            <div class="page-heading">
+              <strong>{% block page_title %}Painel{% endblock %}</strong>
+              <div class="page-kicker">Dados ficticios para validacao de fluxo operacional</div>
+            </div>
+            <div class="topbar-user">
+              <div class="user-pill">
+                <div class="user-avatar">{{ current_user.name[:1]|upper }}</div>
+                <div>
+                  <div class="user-name">{{ current_user.name }}</div>
+                  <div class="user-role">{{ current_user.role }}</div>
+                </div>
+              </div>
+              <form action="{{ url_for('auth.logout') }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn-outline-secondary btn-sm" type="submit"><i class="bi bi-box-arrow-right"></i> Sair</button>
+              </form>
+            </div>
+          </div>
+          <div class="content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                <div class="flash-stack">
+                  {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} app-alert alert-dismissible fade show" role="alert">
+                      <i class="bi bi-{{ 'check-circle' if category == 'success' else 'x-circle' if category == 'danger' else 'exclamation-triangle' if category == 'warning' else 'info-circle' }}"></i>
+                      <div>{{ message }}</div>
+                      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+          </div>
+        </main>
+      </div>
+    {% else %}
+      {% block auth_content %}{% endblock %}
+    {% endif %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block page_title %}Produtos{% endblock %}
+{% block content %}
+<div class="section-header">
+  <div>
+    <h1 class="section-title">Produtos ficticios</h1>
+    <div class="section-subtitle">Cadastro operacional com dados fiscais editaveis para validacao simulada.</div>
+  </div>
+  {% if current_user.role in ['admin', 'operador'] %}
+    <a class="btn btn-success" href="{{ url_for('products.create') }}"><i class="bi bi-plus-circle"></i> Novo produto</a>
+  {% endif %}
+</div>
+
+<div class="panel filter-panel">
+  <form method="get" class="row g-3 align-items-end">
+    <div class="col-md-5">
+      <label class="form-label">Busca</label>
+      <input class="form-control" name="q" value="{{ request.args.get('q', '') }}" placeholder="SKU ou nome do produto">
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Pendencia fiscal</label>
+      <select class="form-select" name="fiscal_gap">
+        <option value="">Todas</option>
+        <option value="ncm" {{ 'selected' if request.args.get('fiscal_gap') == 'ncm' else '' }}>Sem classificacao fiscal do produto (NCM)</option>
+        <option value="cfop" {{ 'selected' if request.args.get('fiscal_gap') == 'cfop' else '' }}>Sem codigo fiscal da operacao (CFOP)</option>
+      </select>
+    </div>
+    <div class="col-md-3 actions">
+      <button class="btn btn-primary" type="submit"><i class="bi bi-funnel"></i> Filtrar</button>
+      <a class="btn btn-outline-secondary" href="{{ url_for('products.index') }}"><i class="bi bi-arrow-counterclockwise"></i> Limpar</a>
+    </div>
+  </form>
+</div>
+
+<div class="panel p-3 p-md-4">
+  <div class="panel-header">
+    <div>
+      <h2 class="section-title">Catalogo fiscal simulado</h2>
+      <div class="section-subtitle">{{ products|length }} produto(s) encontrado(s).</div>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>SKU</th>
+          <th>Marketplace SKU</th>
+          <th>Nome</th>
+          <th>Codigo de barras</th>
+          <th>Classificacao fiscal</th>
+          <th>Codigo da operacao fiscal</th>
+          <th>Venda</th>
+          <th>Status</th>
+          <th>Acoes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in products %}
+          <tr class="{{ 'table-warning' if product.has_fiscal_gaps else '' }}">
+            <td><strong>{{ product.sku }}</strong></td>
+            <td>{{ product.marketplace_sku or '-' }}</td>
+            <td>{{ product.name }}</td>
+            <td>{{ product.ean or '-' }}</td>
+            <td>{% if product.ncm %}{{ product.ncm }}{% else %}<span class="status-badge status-warning"><i class="bi bi-exclamation-triangle"></i> Sem classificacao fiscal</span>{% endif %}</td>
+            <td>{% if product.cfop %}{{ product.cfop }}{% else %}<span class="status-badge status-warning"><i class="bi bi-exclamation-triangle"></i> Sem codigo fiscal</span>{% endif %}</td>
+            <td><strong>{{ product.sale_price|money_br }}</strong></td>
+            <td>
+              {% if product.is_active %}
+                <span class="status-badge status-success"><i class="bi bi-check-circle"></i> Ativo</span>
+              {% else %}
+                <span class="status-badge status-secondary"><i class="bi bi-pause-circle"></i> Inativo</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if current_user.role in ['admin', 'operador'] %}
+                <a class="btn btn-sm btn-outline-primary" href="{{ url_for('products.edit', product_id=product.id) }}"><i class="bi bi-pencil"></i> Editar</a>
+              {% else %}
+                <span class="text-muted-small">Somente leitura</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="9">
+              <div class="empty-state">
+                <i class="bi bi-box"></i>
+                <strong>Nenhum produto cadastrado ainda.</strong>
+                <span>Cadastre produtos ficticios para testar pedidos e validacao fiscal.</span>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

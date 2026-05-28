@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block page_title %}Fechamento Diario{% endblock %}
+{% block content %}
+<div class="section-header">
+  <div>
+    <h1 class="section-title">Fechamento diario ficticio</h1>
+    <div class="section-subtitle">Resumo financeiro e fiscal por data e marketplace.</div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="panel metric">
+      <div class="metric-top">
+        <div><div class="metric-label">Fechamentos</div><div class="metric-hint">Registros apurados</div></div>
+        <div class="metric-icon primary"><i class="bi bi-calendar2-check"></i></div>
+      </div>
+      <div class="metric-value">{{ closings|length }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="panel metric">
+      <div class="metric-top">
+        <div><div class="metric-label">Total de pedidos</div><div class="metric-hint">Soma dos fechamentos</div></div>
+        <div class="metric-icon primary"><i class="bi bi-bag-check"></i></div>
+      </div>
+      <div class="metric-value">{{ closings|sum(attribute='orders_count') }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="panel metric">
+      <div class="metric-top">
+        <div><div class="metric-label">NF-e autorizadas</div><div class="metric-hint">Total ficticio</div></div>
+        <div class="metric-icon success"><i class="bi bi-check-circle"></i></div>
+      </div>
+      <div class="metric-value">{{ closings|sum(attribute='invoices_authorized') }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="panel metric">
+      <div class="metric-top">
+        <div><div class="metric-label">NF-e rejeitadas</div><div class="metric-hint">Total ficticio</div></div>
+        <div class="metric-icon danger"><i class="bi bi-x-circle"></i></div>
+      </div>
+      <div class="metric-value">{{ closings|sum(attribute='invoices_rejected') }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="panel p-3 p-md-4">
+  <div class="panel-header">
+    <div>
+      <h2 class="section-title">Apuracao por marketplace</h2>
+      <div class="section-subtitle">Dados financeiros simulados para conferencia operacional.</div>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Marketplace</th>
+          <th>Pedidos</th>
+          <th>Bruto</th>
+          <th>Frete</th>
+          <th>Descontos</th>
+          <th>Taxas</th>
+          <th>Liquido</th>
+          <th>Pendentes</th>
+          <th>Autorizadas</th>
+          <th>Rejeitadas</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for closing in closings %}
+          <tr>
+            <td>{{ closing.date|date_br }}</td>
+            <td><span class="status-badge status-primary"><i class="bi bi-shop"></i>{{ closing.marketplace }}</span></td>
+            <td>{{ closing.orders_count }}</td>
+            <td><strong>{{ closing.gross_revenue|money_br }}</strong></td>
+            <td>{{ closing.shipping_total|money_br }}</td>
+            <td>{{ closing.discounts_total|money_br }}</td>
+            <td>{{ closing.marketplace_fees_total|money_br }}</td>
+            <td><strong>{{ closing.net_revenue|money_br }}</strong></td>
+            <td><span class="status-badge status-warning">{{ closing.invoices_pending }}</span></td>
+            <td><span class="status-badge status-success">{{ closing.invoices_authorized }}</span></td>
+            <td><span class="status-badge status-danger">{{ closing.invoices_rejected }}</span></td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="11">
+              <div class="empty-state">
+                <i class="bi bi-calendar-x"></i>
+                <strong>Nenhum fechamento ficticio encontrado.</strong>
+                <span>Rode o seed para criar fechamentos diarios de teste.</span>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

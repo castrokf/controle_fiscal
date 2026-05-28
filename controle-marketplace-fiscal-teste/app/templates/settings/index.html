@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block page_title %}Configuracoes{% endblock %}
+{% block content %}
+<div class="section-header">
+  <div>
+    <h1 class="section-title">Configuracoes do ambiente</h1>
+    <div class="section-subtitle">Parametros de teste, geracao ficticia e comportamento local.</div>
+  </div>
+</div>
+
+<div class="panel p-3 p-md-4 mb-3">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+      <h2 class="section-title">Geracao ficticia</h2>
+      <div class="section-subtitle">A automacao recorrente via APScheduler fica desativada por padrao.</div>
+    </div>
+    {% if current_user.role in ['admin', 'operador'] %}
+      <form method="post" action="{{ url_for('settings.generate_fake_orders_now') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-primary" type="submit"><i class="bi bi-plus-circle"></i> Gerar pedidos ficticios agora</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="panel p-3 p-md-4">
+  <div class="panel-header">
+    <div>
+      <h2 class="section-title">Parametros cadastrados</h2>
+      <div class="section-subtitle">Valores usados pelo ambiente de teste local.</div>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead><tr><th>Chave</th><th>Valor</th></tr></thead>
+      <tbody>
+        {% for setting in settings %}
+          <tr><td><code class="code-soft">{{ setting.key }}</code></td><td class="break-message">{{ setting.value }}</td></tr>
+        {% else %}
+          <tr>
+            <td colspan="2">
+              <div class="empty-state">
+                <i class="bi bi-sliders"></i>
+                <strong>Nenhuma configuracao cadastrada.</strong>
+                <span>Rode o seed para criar os parametros iniciais.</span>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

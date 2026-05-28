@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Login - Controle Marketplace Fiscal{% endblock %}
+{% block auth_content %}
+<div class="auth-page">
+  <div class="auth-box p-4 p-md-5">
+    <div class="d-flex align-items-center gap-3 mb-4">
+      <div class="auth-mark"><i class="bi bi-receipt-cutoff"></i></div>
+      <div>
+        <h1 class="h4 mb-1 fw-bold">Controle Marketplace Fiscal</h1>
+        <div class="text-muted-small">Ambiente de teste com dados ficticios</div>
+      </div>
+    </div>
+    <div class="alert alert-info app-alert mb-4">
+      <i class="bi bi-info-circle"></i>
+      <div>Nenhuma NF-e real e emitida. Use apenas dados simulados.</div>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} app-alert">
+            <i class="bi bi-{{ 'check-circle' if category == 'success' else 'x-circle' if category == 'danger' else 'exclamation-triangle' if category == 'warning' else 'info-circle' }}"></i>
+            <div>{{ message }}</div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <form method="post" novalidate>
+      {{ form.hidden_tag() }}
+      <div class="mb-3">
+        {{ form.email.label(class="form-label") }}
+        {{ form.email(class="form-control", placeholder="admin@teste.com") }}
+      </div>
+      <div class="mb-3">
+        {{ form.password.label(class="form-label") }}
+        {{ form.password(class="form-control", placeholder="Teste@1234") }}
+      </div>
+      <div class="form-check mb-4">
+        {{ form.remember(class="form-check-input") }}
+        {{ form.remember.label(class="form-check-label") }}
+      </div>
+      <button class="btn btn-primary w-100" type="submit"><i class="bi bi-box-arrow-in-right"></i> Entrar no painel</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

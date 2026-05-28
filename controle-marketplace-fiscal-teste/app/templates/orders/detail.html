@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+{% from "orders/macros.html" import status_badge %}
+{% block page_title %}Pedido {{ order.marketplace_order_id }}{% endblock %}
+{% block content %}
+<div class="section-header">
+  <div>
+    <h1 class="section-title">Detalhe do pedido</h1>
+    <div class="section-subtitle">{{ order.marketplace }} / {{ order.marketplace_order_id }}</div>
+  </div>
+  <div class="actions">
+    <a class="btn btn-outline-secondary" href="{{ url_for('orders.index') }}"><i class="bi bi-arrow-left"></i> Voltar</a>
+    {% if current_user.role in ['admin', 'operador'] %}
+      <form method="post" action="{{ url_for('orders.validate', order_id=order.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-warning" type="submit"><i class="bi bi-clipboard-check"></i> Validar fiscal</button>
+      </form>
+      <form method="post" action="{{ url_for('orders.issue', order_id=order.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-primary" type="submit"><i class="bi bi-send-check"></i> Emitir NF-e ficticia</button>
+      </form>
+      <form method="post" action="{{ url_for('orders.generate_files', order_id=order.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-success" type="submit"><i class="bi bi-file-earmark-arrow-down"></i> Gerar XML/PDF fake</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-xl-7">
+    <div class="panel p-3 p-md-4 h-100">
+      <div class="panel-header">
+        <div>
+          <h2 class="section-title">Resumo do pedido</h2>
+          <div class="section-subtitle">Dados comerciais e valores ficticios.</div>
+        </div>
+        {{ status_badge(order.order_status) }}
+      </div>
+      <div class="info-list">
+        <div class="info-item"><div class="info-label">Marketplace</div><div class="info-value">{{ order.marketplace }}</div></div>
+        <div class="info-item"><div class="info-label">Numero ficticio</div><div class="info-value">{{ order.marketplace_order_id }}</div></div>
+        <div class="info-item"><div class="info-label">Data/hora</div><div class="info-value">{{ order.order_datetime|datetime_br }}</div></div>
+        <div class="info-item"><div class="info-label">Status fiscal</div><div class="info-value">{{ status_badge(order.fiscal_status) }}</div></div>
+        <div class="info-item"><div class="info-label">Produtos</div><div class="info-value">{{ order.total_amount|money_br }}</div></div>
+        <div class="info-item"><div class="info-label">Frete</div><div class="info-value">{{ order.shipping_amount|money_br }}</div></div>
+        <div class="info-item"><div class="info-label">Desconto</div><div class="info-value">{{ order.discount_amount|money_br }}</div></div>
+        <div class="info-item"><div class="info-label">Taxas ficticias</div><div class="info-value">{{ order.marketplace_fee|money_br }}</div></div>
+        <div class="info-item"><div class="info-label">Valor liquido</div><div class="info-value">{{ order.net_amount|money_br }}</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-5">
+    <div class="panel p-3 p-md-4 h-100">
+      <div class="panel-header">
+        <div>
+          <h2 class="section-title">Comprador ficticio</h2>
+          <div class="section-subtitle">Dados mascarados para ambiente de teste.</div>
+        </div>
+        <i class="bi bi-person-badge text-primary"></i>
+      </div>
+      {% if order.buyer %}
+        <div class="info-list">
+          <div class="info-item"><div class="info-label">Nome</div><div class="info-value">{{ order.buyer.name }}</div></div>
+          <div class="info-item"><div class="info-label">Documento</div><div class="info-value">{{ order.buyer.document|mask_document }}</div></div>
+          <div class="info-item"><div class="info-label">Email</div><div class="info-value">{{ order.buyer.email|mask_email }}</div></div>
+          <div class="info-item"><div class="info-label">Telefone</div><div class="info-value">{{ order.buyer.phone|mask_phone }}</div></div>
+        </div>
+        {% set address = order.buyer.addresses[0] if order.buyer.addresses else None %}
+        <div class="mt-3">
+          <h3 class="h6 fw-bold mb-2"><i class="bi bi-geo-alt"></i> Endereco ficticio</h3>
+          {% if address %}
+            <div class="text-muted-small">{{ address.street }}, {{ address.number }} - {{ address.neighborhood }}</div>
+            <div class="text-muted-small">{{ address.city }}/{{ address.state }} - {{ address.zip_code }}</div>
+          {% else %}
+            <span class="status-badge status-danger"><i class="bi bi-exclamation-circle"></i> Endereco incompleto</span>
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <i class="bi bi-person-x"></i>
+          <strong>Comprador incompleto.</strong>
+          <span>Este pedido precisa de comprador ficticio para emissao simulada.</span>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="panel p-3 p-md-4 mt-3">
+  <div class="panel-header">
+    <div>
+      <h2 class="section-title">Itens do pedido</h2>
+      <div class="section-subtitle">Produtos, valores e dados fiscais simulados.</div>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>SKU</th>
+          <th>Produto</th>
+          <th>Qtd</th>
+          <th>Unitario</th>
+          <th>Total</th>
+          <th>Classificacao fiscal</th>
+          <th>Codigo da operacao fiscal</th>
+          <th>Status fiscal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in order.items %}
+          <tr>
+            <td><strong>{{ item.sku }}</strong></td>
+            <td>{{ item.product_name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.unit_price|money_br }}</td>
+            <td><strong>{{ item.total_price|money_br }}</strong></td>
+            <td>{% if item.ncm %}{{ item.ncm }}{% else %}<span class="status-badge status-warning"><i class="bi bi-exclamation-triangle"></i> Sem NCM</span>{% endif %}</td>
+            <td>{% if item.cfop %}{{ item.cfop }}{% else %}<span class="status-badge status-warning"><i class="bi bi-exclamation-triangle"></i> Sem CFOP</span>{% endif %}</td>
+            <td>
+              {% if item.ncm and item.cfop %}
+                <span class="status-badge status-success"><i class="bi bi-check-circle"></i> Dados fiscais completos</span>
+              {% else %}
+                <span class="status-badge status-warning"><i class="bi bi-exclamation-circle"></i> Dados fiscais pendentes</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="8">
+              <div class="empty-state">
+                <i class="bi bi-box"></i>
+                <strong>Pedido sem itens.</strong>
+                <span>Inclua itens ficticios para testar validacao fiscal.</span>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row g-3 mt-1">
+  <div class="col-lg-6">
+    <div class="panel p-3 p-md-4 h-100">
+      <div class="panel-header">
+        <div>
+          <h2 class="section-title">Fiscal simulado</h2>
+          <div class="section-subtitle">Status, chave ficticia e arquivos de teste.</div>
+        </div>
+        {{ status_badge(order.fiscal_status) }}
+      </div>
+      {% set invoice = order.invoice %}
+      {% if invoice %}
+        <div class="info-list">
+          <div class="info-item"><div class="info-label">Numero ficticio</div><div class="info-value">{{ invoice.invoice_number or '-' }}</div></div>
+          <div class="info-item"><div class="info-label">Serie ficticia</div><div class="info-value">{{ invoice.invoice_series or '-' }}</div></div>
+        </div>
+        <div class="mt-3">
+          <div class="info-label">Chave de acesso ficticia</div>
+          <code class="code-soft d-inline-block mt-1">{{ invoice.access_key or '-' }}</code>
+        </div>
+        {% if invoice.rejection_reason %}
+          <div class="alert alert-danger app-alert mt-3 mb-0">
+            <i class="bi bi-x-circle"></i>
+            <div>{{ invoice.rejection_reason }}</div>
+          </div>
+        {% endif %}
+        <div class="actions mt-3">
+          <a class="btn btn-sm btn-outline-success" href="{{ url_for('fiscal.download', invoice_id=invoice.id, file_type='xml') }}"><i class="bi bi-filetype-xml"></i> Baixar XML fake</a>
+          <a class="btn btn-sm btn-outline-success" href="{{ url_for('fiscal.download', invoice_id=invoice.id, file_type='pdf') }}"><i class="bi bi-filetype-pdf"></i> Baixar PDF fake</a>
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <i class="bi bi-file-earmark-minus"></i>
+          <strong>Sem NF-e ficticia vinculada.</strong>
+          <span>Valide o pedido e emita uma nota ficticia para liberar os arquivos fake.</span>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="panel p-3 p-md-4 h-100">
+      <div class="panel-header">
+        <div>
+          <h2 class="section-title">Eventos da nota</h2>
+          <div class="section-subtitle">Historico da emissao fiscal simulada.</div>
+        </div>
+      </div>
+      {% if order.invoice and order.invoice.events %}
+        <ul class="list-group list-group-flush">
+          {% for event in order.invoice.events %}
+            <li class="list-group-item px-0">
+              <strong>{{ event.event_type }}</strong>
+              <div class="text-muted-small">{{ event.created_at|datetime_br }}</div>
+              <div class="break-message">{{ event.message }}</div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="empty-state">
+          <i class="bi bi-clock-history"></i>
+          <strong>Nenhum evento registrado.</strong>
+          <span>Eventos aparecerao apos validacao ou emissao ficticia.</span>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="panel p-3 p-md-4 mt-3">
+  <div class="panel-header">
+    <div>
+      <h2 class="section-title">Logs do pedido</h2>
+      <div class="section-subtitle">Auditoria operacional relacionada ao pedido.</div>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead><tr><th>Data/hora</th><th>Acao</th><th>Status</th><th>Mensagem</th></tr></thead>
+      <tbody>
+        {% for log in logs %}
+          <tr>
+            <td>{{ log.created_at|datetime_br }}</td>
+            <td><strong>{{ log.action }}</strong></td>
+            <td>{{ status_badge(log.status) }}</td>
+            <td class="break-message">{{ log.message or '-' }}</td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="4">
+              <div class="empty-state">
+                <i class="bi bi-journal-text"></i>
+                <strong>Nenhum log especifico para este pedido.</strong>
+                <span>As acoes fiscais simuladas aparecerao aqui.</span>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

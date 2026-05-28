@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% from "orders/macros.html" import status_badge %}
+{% block page_title %}Fiscal Simulado{% endblock %}
+{% block content %}
+<div class="section-header">
+  <div>
+    <h1 class="section-title">Fiscal simulado</h1>
+    <div class="section-subtitle">Acompanhe NF-e ficticias, rejeicoes simuladas e arquivos XML/PDF fake.</div>
+  </div>
+</div>
+
+<div class="panel p-3 p-md-4">
+  <div class="panel-header">
+    <div>
+      <h2 class="section-title">Notas fiscais ficticias</h2>
+      <div class="section-subtitle">{{ invoices|length }} registro(s) fiscal(is) encontrado(s).</div>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>Criacao</th>
+          <th>Pedido</th>
+          <th>Marketplace</th>
+          <th>Numero</th>
+          <th>Serie</th>
+          <th>Status</th>
+          <th>Pendencias</th>
+          <th>Arquivos</th>
+          <th>Acoes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for invoice in invoices %}
+          {% set missing_ncm = invoice.order.items|selectattr('ncm', 'equalto', None)|list|length %}
+          {% set missing_cfop = invoice.order.items|selectattr('cfop', 'equalto', None)|list|length %}
+          <tr>
+            <td>{{ invoice.created_at|datetime_br }}</td>
+            <td>
+              <a class="fw-bold" href="{{ url_for('orders.detail', order_id=invoice.order.id) }}">{{ invoice.order.marketplace_order_id }}</a>
+            </td>
+            <td><span class="status-badge status-primary"><i class="bi bi-shop"></i>{{ invoice.order.marketplace }}</span></td>
+            <td>{{ invoice.invoice_number or '-' }}</td>
+            <td>{{ invoice.invoice_series or '-' }}</td>
+            <td>{{ status_badge(invoice.status) }}</td>
+            <td>
+              <div class="d-flex flex-column gap-1">
+                {% if missing_ncm %}
+                  <span class="status-badge status-warning"><i class="bi bi-exclamation-triangle"></i> Produto sem NCM</span>
+                {% endif %}
+                {% if missing_cfop %}
+                  <span class="status-badge status-warning"><i class="bi bi-exclamation-triangle"></i> Produto sem CFOP</span>
+                {% endif %}
+                {% if not invoice.order.buyer %}
+                  <span class="status-badge status-danger"><i class="bi bi-person-x"></i> Comprador incompleto</span>
+                {% elif not invoice.order.buyer.addresses %}
+                  <span class="status-badge status-danger"><i class="bi bi-geo-alt"></i> Endereco incompleto</span>
+                {% endif %}
+                {% if invoice.rejection_reason %}
+                  <span class="status-badge status-danger"><i class="bi bi-x-circle"></i> Rejeicao ficticia</span>
+                {% endif %}
+                {% if not missing_ncm and not missing_cfop and invoice.order.buyer and invoice.order.buyer.addresses and not invoice.rejection_reason %}
+                  <span class="status-badge status-success"><i class="bi bi-check-circle"></i> Sem pendencias</span>
+                {% endif %}
+              </div>
+            </td>
+            <td>
+              {% if invoice.xml_path %}<span class="status-badge status-success"><i class="bi bi-filetype-xml"></i> XML</span>{% endif %}
+              {% if invoice.pdf_path %}<span class="status-badge status-success"><i class="bi bi-filetype-pdf"></i> PDF</span>{% endif %}
+              {% if not invoice.xml_path and not invoice.pdf_path %}<span class="status-badge status-secondary"><i class="bi bi-file-earmark"></i> Sem arquivo</span>{% endif %}
+            </td>
+            <td>
+              <div class="actions">
+                <form method="post" action="{{ url_for('fiscal.generate_files', invoice_id=invoice.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="btn btn-sm btn-outline-primary" type="submit"><i class="bi bi-file-earmark-plus"></i> Gerar</button>
+                </form>
+                <a class="btn btn-sm btn-outline-success" href="{{ url_for('fiscal.download', invoice_id=invoice.id, file_type='xml') }}"><i class="bi bi-download"></i> XML</a>
+                <a class="btn btn-sm btn-outline-success" href="{{ url_for('fiscal.download', invoice_id=invoice.id, file_type='pdf') }}"><i class="bi bi-download"></i> PDF</a>
+              </div>
+            </td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="9">
+              <div class="empty-state">
+                <i class="bi bi-file-earmark-text"></i>
+                <strong>Nenhuma NF-e ficticia encontrada.</strong>
+                <span>Emita notas ficticias a partir da tela de detalhe do pedido.</span>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

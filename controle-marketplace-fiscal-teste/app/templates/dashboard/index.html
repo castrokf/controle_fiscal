@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% from "orders/macros.html" import status_badge %}
+{% block page_title %}Dashboard{% endblock %}
+{% block content %}
+<div class="section-header">
+  <div>
+    <h1 class="section-title">Visao geral operacional</h1>
+    <div class="section-subtitle">Resumo dos pedidos ficticios, pendencias fiscais e faturamento do dia.</div>
+  </div>
+  <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('reports.index') }}"><i class="bi bi-bar-chart-line"></i> Ver relatorios</a>
+</div>
+
+<div class="row g-3 mb-4">
+  {% set overview_cards = [
+    ('Pedidos hoje', stats.orders_today, 'bi-bag-check', 'primary', 'Total de pedidos recebidos'),
+    ('Amazon hoje', stats.amazon_today, 'bi-shop', 'primary', 'Pedidos ficticios Amazon'),
+    ('Shopee hoje', stats.shopee_today, 'bi-basket', 'primary', 'Pedidos ficticios Shopee'),
+    ('Faturamento do dia', stats.revenue_today|money_br, 'bi-cash-stack', 'success', 'Receita bruta ficticia'),
+    ('Amazon faturamento', stats.revenue_by_marketplace.Amazon|money_br, 'bi-graph-up', 'success', 'Faturamento ficticio'),
+    ('Shopee faturamento', stats.revenue_by_marketplace.Shopee|money_br, 'bi-graph-up-arrow', 'success', 'Faturamento ficticio')
+  ] %}
+  {% for label, value, icon, tone, hint in overview_cards %}
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="panel metric">
+        <div class="metric-top">
+          <div>
+            <div class="metric-label">{{ label }}</div>
+            <div class="metric-hint">{{ hint }}</div>
+          </div>
+          <div class="metric-icon {{ tone }}"><i class="bi {{ icon }}"></i></div>
+        </div>
+        <div class="metric-value">{{ value }}</div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<div class="section-header">
+  <div>
+    <h2 class="section-title">Pendencias fiscais</h2>
+    <div class="section-subtitle">Itens que precisam de conferencia antes da emissao simulada.</div>
+  </div>
+</div>
+<div class="row g-3 mb-4">
+  {% set fiscal_cards = [
+    ('NF-e pendentes', stats.pending_invoices, 'bi-hourglass-split', 'warning', 'Pedidos aguardando emissao'),
+    ('NF-e autorizadas', stats.authorized_invoices, 'bi-check-circle', 'success', 'Notas ficticias autorizadas'),
+    ('NF-e rejeitadas', stats.rejected_invoices, 'bi-x-circle', 'danger', 'Notas ficticias com erro'),
+    ('Produtos sem classificacao fiscal', stats.products_without_ncm, 'bi-exclamation-triangle', 'warning', 'Campo NCM pendente'),
+    ('Produtos sem codigo da operacao fiscal', stats.products_without_cfop, 'bi-exclamation-diamond', 'warning', 'Campo CFOP pendente')
+  ] %}
+  {% for label, value, icon, tone, hint in fiscal_cards %}
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="panel metric">
+        <div class="metric-top">
+          <div>
+            <div class="metric-label">{{ label }}</div>
+            <div class="metric-hint">{{ hint }}</div>
+          </div>
+          <div class="metric-icon {{ tone }}"><i class="bi {{ icon }}"></i></div>
+        </div>
+        <div class="metric-value">{{ value }}</div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<div class="panel p-3 p-md-4">
+  <div class="panel-header">
+    <div>
+      <h2 class="section-title">Movimentacao recente</h2>
+      <div class="section-subtitle">Ultimos pedidos ficticios centralizados no painel.</div>
+    </div>
+    <a class="btn btn-primary btn-sm" href="{{ url_for('orders.index') }}"><i class="bi bi-arrow-right"></i> Ver pedidos</a>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>Horario</th>
+          <th>Marketplace</th>
+          <th>Pedido</th>
+          <th>Cliente</th>
+          <th>Valor</th>
+          <th>Status pedido</th>
+          <th>Status fiscal</th>
+          <th>Acoes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in recent_orders %}
+          <tr>
+            <td>{{ order.order_datetime|datetime_br }}</td>
+            <td><span class="status-badge status-primary"><i class="bi bi-shop"></i>{{ order.marketplace }}</span></td>
+            <td><strong>{{ order.marketplace_order_id }}</strong></td>
+            <td>{{ order.buyer.name if order.buyer else '-' }}</td>
+            <td><strong>{{ order.total_amount|money_br }}</strong></td>
+            <td>{{ status_badge(order.order_status) }}</td>
+            <td>{{ status_badge(order.fiscal_status) }}</td>
+            <td><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('orders.detail', order_id=order.id) }}"><i class="bi bi-eye"></i> Abrir</a></td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="8">
+              <div class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <strong>Nenhum pedido ficticio encontrado.</strong>
+                <span>Gere dados ficticios para testar o painel.</span>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

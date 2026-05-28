@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: controle-marketplace-fiscal-teste
+    runtime: python
+    rootDir: controle-marketplace-fiscal-teste
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    preDeployCommand: python -m flask --app run.py db upgrade
+    startCommand: gunicorn run:app
+    initialDeployHook: python -m flask --app run.py seed
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.10"
+      - key: FLASK_ENV
+        value: production
+      - key: AUTO_GENERATE_FAKE_ORDERS
+        value: "false"
+      - key: FAKE_ORDER_INTERVAL_MINUTES
+        value: "10"
+      - key: LOCAL_DOWNLOAD_COPY_ENABLED
+        value: "false"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: controle-fiscal-db
+          property: connectionString
+
+databases:
+  - name: controle-fiscal-db
+    plan: free
+    databaseName: controle_fiscal_teste
+    user: controle_fiscal_user

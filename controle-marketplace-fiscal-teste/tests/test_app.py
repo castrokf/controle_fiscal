@@ -1,0 +1,128 @@
+from pathlib import Path
+
+from app.extensions import db
+from app.models import FISCAL_AUTORIZADA, FISCAL_PRONTO, MarketplaceOrder, Product, User
+from tests.conftest import create_complete_order, create_user, login
+
+
+def test_protected_route_requires_login(client):
+    response = client.get("/dashboard/")
+    assert response.status_code == 302
+    assert "/auth/login" in response.headers["Location"]
+
+
+def test_login_with_seed_admin_credentials(client, app):
+    with app.app_context():
+        create_user()
+    response = login(client)
+    assert response.status_code == 200
+    assert b"Dashboard" in response.data
+
+
+def test_create_product(client, app):
+    with app.app_context():
+        create_user()
+    login(client)
+    response = client.post(
+        "/products/create",
+        data={
+            "sku": "SKU-NOVO-001",
+            "marketplace_sku": "MKP-NOVO-001",
+            "name": "Produto Novo Ficticio",
+            "ean": "7890000001111",
+            "ncm": "84000000",
+            "cfop": "5102",
+            "cest": "",
+            "unit": "UN",
+            "origin": "0",
+            "cst": "00",
+            "csosn": "102",
+            "cost_price": "10.00",
+            "sale_price": "39.90",
+            "is_active": "y",
+        },
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+    with app.app_context():
+        assert Product.query.filter_by(sku="SKU-NOVO-001").count() == 1
+
+
+def test_seed_creates_fake_data(app):
+    runner = app.test_cli_runner()
+    result = runner.invoke(args=["seed"])
+    assert result.exit_code == 0
+    with app.app_context():
+        assert User.query.filter_by(email="admin@teste.com").count() == 1
+        assert Product.query.count() == 20
+        assert MarketplaceOrder.query.count() == 100
+
+
+def test_orders_list_and_time_filter(client, app):
+    runner = app.test_cli_runner()
+    assert runner.invoke(args=["seed"]).exit_code == 0
+    login(client)
+    response = client.get("/orders/?marketplace=Shopee&time_start=08:00&time_end=23:59")
+    assert response.status_code == 200
+    assert b"Shopee" in response.data
+    assert b"SHP-TESTE" in response.data
+
+
+def test_validate_issue_and_generate_fake_files(client, app):
+    with app.app_context():
+        create_user()
+        order = create_complete_order()
+        order_id = order.id
+
+    login(client)
+    response = client.post(f"/orders/{order_id}/validate", follow_redirects=True)
+    assert response.status_code == 200
+    with app.app_context():
+        order = db.session.get(MarketplaceOrder, order_id)
+        assert order.fiscal_status == FISCAL_PRONTO
+
+    response = client.post(f"/orders/{order_id}/issue", follow_redirects=True)
+    assert response.status_code == 200
+    with app.app_context():
+        order = db.session.get(MarketplaceOrder, order_id)
+        assert order.invoice is not None
+        assert order.invoice.status == FISCAL_AUTORIZADA
+        invoice_id = order.invoice.id
+
+    response = client.post(f"/orders/{order_id}/generate-files", follow_redirects=True)
+    assert response.status_code == 200
+    with app.app_context():
+        order = db.session.get(MarketplaceOrder, order_id)
+        xml_path = Path(app.config["STORAGE_DIR"]) / order.invoice.xml_path
+        pdf_path = Path(app.config["STORAGE_DIR"]) / order.invoice.pdf_path
+        assert xml_path.exists()
+        assert pdf_path.exists()
+
+    response = client.get(f"/fiscal/invoices/{invoice_id}/download/xml")
+    assert response.status_code == 200
+    assert response.mimetype == "application/xml"
+    assert b"<finalidade>" in response.data
+    assert b"<corpo>" in response.data
+    assert b"Documento gerado para demonstrar" in response.data
+
+    with app.app_context():
+        local_download_dir = Path(app.config["STORAGE_DIR"]).parent / "local-downloads-test"
+        app.config["LOCAL_DOWNLOAD_COPY_ENABLED"] = True
+        app.config["LOCAL_DOWNLOAD_DIR"] = str(local_download_dir)
+        response = client.get(f"/fiscal/invoices/{invoice_id}/download/pdf")
+        assert response.status_code == 200
+        assert b"FINALIDADE" in response.data
+        assert b"CORPO DA SIMULACAO" in response.data
+        assert (local_download_dir / "nfe-fake-1.pdf").exists()
+
+
+def test_reports_and_csv_export(client, app):
+    runner = app.test_cli_runner()
+    assert runner.invoke(args=["seed"]).exit_code == 0
+    login(client)
+    response = client.get("/reports/")
+    assert response.status_code == 200
+    assert b"Pedidos por marketplace" in response.data
+    response = client.get("/reports/export/orders.csv")
+    assert response.status_code == 200
+    assert response.mimetype == "text/csv"

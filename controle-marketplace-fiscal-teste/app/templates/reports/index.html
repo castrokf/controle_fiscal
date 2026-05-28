@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block page_title %}Relatorios{% endblock %}
+{% block content %}
+<div class="section-header">
+  <div>
+    <h1 class="section-title">Relatorios operacionais</h1>
+    <div class="section-subtitle">Indicadores ficticios por marketplace, horario, produtos e status fiscal.</div>
+  </div>
+  <a class="btn btn-success" href="{{ url_for('reports.export_orders_csv') }}"><i class="bi bi-filetype-csv"></i> Exportar pedidos CSV</a>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="panel metric">
+      <div class="metric-top">
+        <div><div class="metric-label">Faturamento diario</div><div class="metric-hint">Valor bruto ficticio</div></div>
+        <div class="metric-icon success"><i class="bi bi-cash-stack"></i></div>
+      </div>
+      <div class="metric-value">{{ report.daily_revenue|money_br }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="panel metric">
+      <div class="metric-top">
+        <div><div class="metric-label">NF-e pendentes</div><div class="metric-hint">Aguardando emissao</div></div>
+        <div class="metric-icon warning"><i class="bi bi-hourglass"></i></div>
+      </div>
+      <div class="metric-value">{{ report.pending_invoices }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="panel metric">
+      <div class="metric-top">
+        <div><div class="metric-label">NF-e autorizadas</div><div class="metric-hint">Autorizacao ficticia</div></div>
+        <div class="metric-icon success"><i class="bi bi-check-circle"></i></div>
+      </div>
+      <div class="metric-value">{{ report.authorized_invoices }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="panel metric">
+      <div class="metric-top">
+        <div><div class="metric-label">NF-e rejeitadas</div><div class="metric-hint">Rejeicao simulada</div></div>
+        <div class="metric-icon danger"><i class="bi bi-x-circle"></i></div>
+      </div>
+      <div class="metric-value">{{ report.rejected_invoices }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="panel p-3 p-md-4 h-100">
+      <div class="panel-header">
+        <div>
+          <h2 class="section-title">Pedidos por marketplace</h2>
+          <div class="section-subtitle">Volume e faturamento ficticio por canal.</div>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead><tr><th>Marketplace</th><th>Pedidos</th><th>Faturamento</th></tr></thead>
+          <tbody>
+            {% for marketplace, count, revenue in report.by_marketplace %}
+              <tr><td><span class="status-badge status-primary"><i class="bi bi-shop"></i>{{ marketplace }}</span></td><td>{{ count }}</td><td><strong>{{ revenue|money_br }}</strong></td></tr>
+            {% else %}
+              <tr><td colspan="3"><div class="empty-state"><i class="bi bi-inbox"></i><strong>Nenhum dado por marketplace.</strong><span>Rode o seed para popular dados ficticios.</span></div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="panel p-3 p-md-4 h-100">
+      <div class="panel-header">
+        <div>
+          <h2 class="section-title">Distribuicao por horario</h2>
+          <div class="section-subtitle">Quantidade de pedidos por faixa horaria no formato 24 horas.</div>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead><tr><th>Faixa horaria</th><th>Pedidos</th></tr></thead>
+          <tbody>
+            {% for row in report.by_hour %}
+              <tr><td><strong>{{ row.range }}</strong></td><td>{{ row.count }}</td></tr>
+            {% else %}
+              <tr><td colspan="2"><div class="empty-state"><i class="bi bi-clock"></i><strong>Nenhum dado por horario.</strong><span>Os pedidos ficticios aparecerao aqui.</span></div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="panel p-3 p-md-4 h-100">
+      <div class="panel-header">
+        <div>
+          <h2 class="section-title">Produtos mais vendidos</h2>
+          <div class="section-subtitle">Ranking por quantidade vendida ficticia.</div>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead><tr><th>SKU</th><th>Produto</th><th>Qtd</th></tr></thead>
+          <tbody>
+            {% for sku, name, qty in report.top_products %}
+              <tr><td><strong>{{ sku }}</strong></td><td>{{ name }}</td><td>{{ qty }}</td></tr>
+            {% else %}
+              <tr><td colspan="3"><div class="empty-state"><i class="bi bi-box"></i><strong>Nenhum produto vendido.</strong><span>Pedidos com itens alimentarao este ranking.</span></div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="panel p-3 p-md-4 h-100">
+      <div class="panel-header">
+        <div>
+          <h2 class="section-title">Pendencias fiscais em produtos</h2>
+          <div class="section-subtitle">Produtos que podem causar rejeicao simulada.</div>
+        </div>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <h3 class="h6 fw-bold mb-2">Sem classificacao fiscal do produto (NCM)</h3>
+          <ul class="list-group list-group-flush">
+            {% for product in report.products_without_ncm %}
+              <li class="list-group-item px-0 d-flex justify-content-between gap-2"><span>{{ product.sku }} - {{ product.name }}</span><span class="status-badge status-warning">NCM</span></li>
+            {% else %}
+              <li class="list-group-item px-0 text-muted">Nenhum produto.</li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="col-md-6">
+          <h3 class="h6 fw-bold mb-2">Sem codigo fiscal da operacao (CFOP)</h3>
+          <ul class="list-group list-group-flush">
+            {% for product in report.products_without_cfop %}
+              <li class="list-group-item px-0 d-flex justify-content-between gap-2"><span>{{ product.sku }} - {{ product.name }}</span><span class="status-badge status-warning">CFOP</span></li>
+            {% else %}
+              <li class="list-group-item px-0 text-muted">Nenhum produto.</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

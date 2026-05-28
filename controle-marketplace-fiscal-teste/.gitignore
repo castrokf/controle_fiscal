@@ -1,0 +1,13 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+server-*.log
+instance/
+storage/app.db
+storage/invoices/xml/*.xml
+storage/invoices/pdf/*.pdf
+!storage/invoices/xml/.gitkeep
+!storage/invoices/pdf/.gitkeep

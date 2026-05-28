@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block page_title %}{{ 'Editar produto' if product else 'Novo produto' }}{% endblock %}
+{% block content %}
+<div class="section-header">
+  <div>
+    <h1 class="section-title">{{ 'Editar produto ficticio' if product else 'Novo produto ficticio' }}</h1>
+    <div class="section-subtitle">Organize identificacao, dados fiscais, precos e status do produto.</div>
+  </div>
+  <a class="btn btn-outline-secondary" href="{{ url_for('products.index') }}"><i class="bi bi-arrow-left"></i> Voltar</a>
+</div>
+
+<form method="post" novalidate>
+  {{ form.hidden_tag() }}
+
+  <div class="panel p-3 p-md-4 mb-3">
+    <div class="panel-header">
+      <div>
+        <h2 class="section-title">Identificacao</h2>
+        <div class="section-subtitle">Dados comerciais usados nos pedidos ficticios.</div>
+      </div>
+    </div>
+    <div class="row g-3">
+      <div class="col-md-3">
+        {{ form.sku.label(class="form-label") }}
+        {{ form.sku(class="form-control") }}
+      </div>
+      <div class="col-md-3">
+        {{ form.marketplace_sku.label(class="form-label") }}
+        {{ form.marketplace_sku(class="form-control") }}
+      </div>
+      <div class="col-md-6">
+        {{ form.name.label(class="form-label") }}
+        {{ form.name(class="form-control") }}
+      </div>
+      <div class="col-md-4">
+        {{ form.ean.label(class="form-label") }}
+        {{ form.ean(class="form-control") }}
+      </div>
+      <div class="col-md-2">
+        {{ form.unit.label(class="form-label") }}
+        {{ form.unit(class="form-select") }}
+      </div>
+      <div class="col-md-4">
+        {{ form.origin.label(class="form-label") }}
+        {{ form.origin(class="form-select") }}
+      </div>
+    </div>
+  </div>
+
+  <div class="panel p-3 p-md-4 mb-3">
+    <div class="panel-header">
+      <div>
+        <h2 class="section-title">Dados fiscais</h2>
+        <div class="section-subtitle">Campos usados na validacao fiscal simulada.</div>
+      </div>
+    </div>
+    <div class="row g-3">
+      <div class="col-md-3">
+        {{ form.ncm.label(class="form-label") }}
+        {{ form.ncm(class="form-control") }}
+      </div>
+      <div class="col-md-3">
+        {{ form.cfop.label(class="form-label") }}
+        {{ form.cfop(class="form-control") }}
+      </div>
+      <div class="col-md-3">
+        {{ form.cest.label(class="form-label") }}
+        {{ form.cest(class="form-control") }}
+      </div>
+      <div class="col-md-3">
+        {{ form.cst.label(class="form-label") }}
+        {{ form.cst(class="form-control") }}
+      </div>
+      <div class="col-md-3">
+        {{ form.csosn.label(class="form-label") }}
+        {{ form.csosn(class="form-control") }}
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-7">
+      <div class="panel p-3 p-md-4 h-100">
+        <div class="panel-header">
+          <div>
+            <h2 class="section-title">Precos</h2>
+            <div class="section-subtitle">Valores ficticios para margem e faturamento.</div>
+          </div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            {{ form.cost_price.label(class="form-label") }}
+            {{ form.cost_price(class="form-control") }}
+          </div>
+          <div class="col-md-6">
+            {{ form.sale_price.label(class="form-label") }}
+            {{ form.sale_price(class="form-control") }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="panel p-3 p-md-4 h-100">
+        <div class="panel-header">
+          <div>
+            <h2 class="section-title">Status</h2>
+            <div class="section-subtitle">Controle de disponibilidade no ambiente de teste.</div>
+          </div>
+        </div>
+        <div class="form-check form-switch">
+          {{ form.is_active(class="form-check-input", role="switch") }}
+          {{ form.is_active.label(class="form-check-label fw-bold") }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions mt-4">
+    <button class="btn btn-primary" type="submit"><i class="bi bi-check2-circle"></i> Salvar produto</button>
+    <a class="btn btn-outline-secondary" href="{{ url_for('products.index') }}"><i class="bi bi-x-circle"></i> Cancelar</a>
+  </div>
+</form>
+{% endblock %}
