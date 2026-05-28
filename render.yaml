@@ -5,9 +5,7 @@ services:
     rootDir: controle-marketplace-fiscal-teste
     plan: free
     buildCommand: pip install -r requirements.txt
-    preDeployCommand: python -m flask --app run.py db upgrade
     startCommand: gunicorn run:app
-    initialDeployHook: python -m flask --app run.py seed
     envVars:
       - key: PYTHON_VERSION
         value: "3.12.10"
