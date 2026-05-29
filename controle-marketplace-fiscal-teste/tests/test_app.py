@@ -1,7 +1,9 @@
 from pathlib import Path
 
+from app.config import _database_url
 from app.extensions import db
 from app.models import FISCAL_AUTORIZADA, FISCAL_PRONTO, MarketplaceOrder, Product, User
+from app.security import reset_login_failures
 from tests.conftest import create_complete_order, create_user, login
 
 
@@ -17,6 +19,55 @@ def test_login_with_seed_admin_credentials(client, app):
     response = login(client)
     assert response.status_code == 200
     assert b"Dashboard" in response.data
+
+
+def test_login_page_does_not_expose_demo_credentials(client):
+    response = client.get("/auth/login")
+    assert response.status_code == 200
+    assert b"admin@teste.com" not in response.data
+    assert b"Teste@1234" not in response.data
+    assert b"SenhaTeste@123456" not in response.data
+
+
+def test_login_rejects_external_next_redirect(client, app):
+    with app.app_context():
+        create_user()
+    response = client.post(
+        "/auth/login?next=https://example.com/phishing",
+        data={"email": "admin@teste.com", "password": "SenhaTeste@123456"},
+        follow_redirects=False,
+    )
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/dashboard/")
+
+
+def test_login_rate_limit_blocks_repeated_failures(client):
+    reset_login_failures()
+    for _ in range(3):
+        response = client.post(
+            "/auth/login",
+            data={"email": "bloqueio@example.com", "password": "senha-errada"},
+        )
+        assert response.status_code == 200
+
+    response = client.post(
+        "/auth/login",
+        data={"email": "bloqueio@example.com", "password": "senha-errada"},
+    )
+    assert response.status_code == 429
+    reset_login_failures()
+
+
+def test_security_headers_are_applied(client):
+    response = client.get("/auth/login")
+    assert response.headers["X-Frame-Options"] == "DENY"
+    assert response.headers["X-Content-Type-Options"] == "nosniff"
+    assert "frame-ancestors 'none'" in response.headers["Content-Security-Policy"]
+
+
+def test_database_url_accepts_render_postgres_scheme(monkeypatch):
+    monkeypatch.setenv("DATABASE_URL", "postgres://user:pass@host:5432/dbname")
+    assert _database_url() == "postgresql+psycopg2://user:pass@host:5432/dbname"
 
 
 def test_create_product(client, app):
@@ -53,7 +104,7 @@ def test_seed_creates_fake_data(app):
     result = runner.invoke(args=["seed"])
     assert result.exit_code == 0
     with app.app_context():
-        assert User.query.filter_by(email="admin@teste.com").count() == 1
+        assert User.query.filter_by(email=app.config["INITIAL_ADMIN_EMAIL"]).count() == 1
         assert Product.query.count() == 20
         assert MarketplaceOrder.query.count() == 100
 

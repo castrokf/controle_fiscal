@@ -5,7 +5,7 @@ services:
     rootDir: controle-marketplace-fiscal-teste
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn run:app
+    startCommand: python -m flask --app run.py deploy && gunicorn run:app --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
         value: "3.12.10"
@@ -19,6 +19,28 @@ services:
         value: "false"
       - key: SECRET_KEY
         generateValue: true
+      - key: ENABLE_AUTO_SEED
+        value: "true"
+      - key: INITIAL_ADMIN_NAME
+        value: "Administrador"
+      - key: INITIAL_ADMIN_EMAIL
+        sync: false
+      - key: INITIAL_ADMIN_PASSWORD
+        sync: false
+      - key: LOGIN_MAX_ATTEMPTS
+        value: "5"
+      - key: LOGIN_ATTEMPT_WINDOW_SECONDS
+        value: "300"
+      - key: LOGIN_LOCKOUT_SECONDS
+        value: "900"
+      - key: WTF_CSRF_TIME_LIMIT_SECONDS
+        value: "3600"
+      - key: BCRYPT_LOG_ROUNDS
+        value: "12"
+      - key: SECURITY_HEADERS_ENABLED
+        value: "true"
+      - key: TRUST_PROXY_HEADERS
+        value: "true"
       - key: DATABASE_URL
         fromDatabase:
           name: controle-fiscal-db

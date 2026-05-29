@@ -29,7 +29,7 @@ def client(app):
     return app.test_client()
 
 
-def create_user(email="admin@teste.com", password="Teste@1234", role="admin"):
+def create_user(email="admin@teste.com", password="SenhaTeste@123456", role="admin"):
     user = User(name="Admin Teste", email=email, role=role, is_active=True)
     user.set_password(password)
     db.session.add(user)
@@ -37,7 +37,7 @@ def create_user(email="admin@teste.com", password="Teste@1234", role="admin"):
     return user
 
 
-def login(client, email="admin@teste.com", password="Teste@1234"):
+def login(client, email="admin@teste.com", password="SenhaTeste@123456"):
     return client.post(
         "/auth/login",
         data={"email": email, "password": password},

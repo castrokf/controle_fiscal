@@ -3,9 +3,11 @@ from pathlib import Path
 
 from flask import Flask, redirect, render_template, url_for
 from flask_login import current_user
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from app.config import config_by_name
 from app.extensions import bcrypt, csrf, db, login_manager, migrate
+from app.security import apply_security_headers
 from app.utils import date_br, datetime_br, mask_document, mask_email, mask_phone, money_br, status_class, status_label
 
 
@@ -16,12 +18,14 @@ def create_app(config_name=None, config_overrides=None):
     if config_overrides:
         app.config.update(config_overrides)
 
+    _configure_proxy_headers(app)
     _ensure_storage_dirs(app)
     _init_extensions(app)
     _register_blueprints(app)
     _register_cli(app)
     _register_template_helpers(app)
     _register_error_handlers(app)
+    _register_security_headers(app)
     _maybe_start_scheduler(app)
 
     @app.get("/")
@@ -74,8 +78,9 @@ def _register_blueprints(app):
 
 
 def _register_cli(app):
-    from app.cli import seed_command
+    from app.cli import deploy_command, seed_command
 
+    app.cli.add_command(deploy_command)
     app.cli.add_command(seed_command)
 
 
@@ -98,6 +103,17 @@ def _register_error_handlers(app):
     @app.errorhandler(404)
     def not_found(error):
         return render_template("errors/404.html"), 404
+
+
+def _register_security_headers(app):
+    @app.after_request
+    def add_security_headers(response):
+        return apply_security_headers(response)
+
+
+def _configure_proxy_headers(app):
+    if app.config.get("TRUST_PROXY_HEADERS"):
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 
 
 def _ensure_storage_dirs(app):

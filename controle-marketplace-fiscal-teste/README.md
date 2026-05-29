@@ -84,6 +84,16 @@ Crie o arquivo `.env` com base no exemplo:
 copy .env.example .env
 ```
 
+Abra o `.env` e preencha o administrador inicial antes de rodar o seed:
+
+```env
+INITIAL_ADMIN_NAME=Administrador
+INITIAL_ADMIN_EMAIL=<seu-email@seudominio.com>
+INITIAL_ADMIN_PASSWORD=<sua senha forte privada>
+```
+
+A senha do administrador precisa ter pelo menos 12 caracteres, com letra maiuscula, letra minuscula, numero e caractere especial.
+
 ## Banco de dados
 
 Aplicar migrations:
@@ -126,9 +136,13 @@ http://127.0.0.1:5000
 Login inicial:
 
 ```text
-Email: admin@teste.com
-Senha: Teste@1234
+Use o email e a senha definidos no `.env`:
+
+INITIAL_ADMIN_EMAIL
+INITIAL_ADMIN_PASSWORD
 ```
+
+Por seguranca, a tela de login nao mostra credenciais de exemplo.
 
 ## Testar filtro por horario
 
@@ -208,6 +222,23 @@ Cobertura basica:
 - geracao de XML/PDF fake
 - relatorios e CSV
 
+## Seguranca implementada
+
+Este MVP e de portifolio/demo tecnica, mas ja possui uma base de seguranca mais seria:
+
+- senha inicial do admin via variaveis de ambiente, sem senha publica hardcoded;
+- tela de login sem usuario/senha de exemplo;
+- politica minima de senha forte para o admin criado pelo seed;
+- protecao CSRF em formularios;
+- cookies de sessao `HttpOnly`, `SameSite=Lax` e `Secure` em producao;
+- expiracao de CSRF e sessao permanente com tempo controlado;
+- limite de tentativas de login com bloqueio temporario;
+- bloqueio de redirect externo no parametro `next`;
+- headers de seguranca: CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy e HSTS em producao;
+- logs de auditoria para login, falha de login, logout e acoes operacionais.
+
+Para virar autenticacao de produto real, os proximos passos naturais seriam recuperacao de senha, troca de senha pelo usuario, 2FA opcional e armazenamento do rate limit em Redis/PostgreSQL em vez de memoria do processo.
+
 ## Deploy de teste no Render
 
 O repositório já tem um `render.yaml` na raiz apontando para esta pasta:
@@ -222,8 +253,8 @@ Esse Blueprint cria:
 - 1 banco PostgreSQL;
 - `SECRET_KEY` gerada automaticamente;
 - `DATABASE_URL` ligada ao PostgreSQL;
-- migrations antes do deploy;
-- seed inicial uma vez para criar dados ficticios.
+- migrations no comando de start;
+- seed inicial automatico apenas se o banco ainda nao tiver usuario cadastrado.
 
 No Render:
 
@@ -231,7 +262,10 @@ No Render:
 2. Acesse `New > Blueprint`.
 3. Conecte o repositório `castrokf/controle_fiscal`.
 4. Selecione o arquivo `render.yaml` na raiz.
-5. Clique em `Deploy Blueprint`.
+5. Quando o Render pedir variaveis `sync: false`, preencha:
+   - `INITIAL_ADMIN_EMAIL`: seu email de acesso;
+   - `INITIAL_ADMIN_PASSWORD`: uma senha forte privada.
+6. Clique em `Deploy Blueprint`.
 
 Configuracao usada pelo Blueprint:
 
@@ -244,19 +278,7 @@ pip install -r requirements.txt
 Start command:
 
 ```bash
-gunicorn run:app
-```
-
-Pre-deploy command:
-
-```bash
-python -m flask --app run.py db upgrade
-```
-
-Initial deploy hook:
-
-```bash
-python -m flask --app run.py seed
+python -m flask --app run.py deploy && gunicorn run:app --bind 0.0.0.0:$PORT
 ```
 
 Variaveis de ambiente principais:
@@ -264,16 +286,20 @@ Variaveis de ambiente principais:
 ```env
 SECRET_KEY=gerada automaticamente pelo Render
 DATABASE_URL=ligada automaticamente ao PostgreSQL do Render
+INITIAL_ADMIN_EMAIL=preenchida manualmente no Render
+INITIAL_ADMIN_PASSWORD=preenchida manualmente no Render
+ENABLE_AUTO_SEED=true
 AUTO_GENERATE_FAKE_ORDERS=false
 FAKE_ORDER_INTERVAL_MINUTES=10
 LOCAL_DOWNLOAD_COPY_ENABLED=false
 ```
 
-Se o plano escolhido nao executar `preDeployCommand` ou `initialDeployHook`, rode manualmente no Shell do Render:
+O comando `deploy` aplica migrations e executa o seed inicial somente quando o banco ainda nao possui usuario. Isso evita apagar dados em reinicios do servico.
+
+Se precisar rodar manualmente no Shell do Render:
 
 ```bash
-python -m flask --app run.py db upgrade
-python -m flask --app run.py seed
+python -m flask --app run.py deploy
 ```
 
 Para Render, prefira PostgreSQL. SQLite em hospedagem pode perder dados em reinicio de ambiente.

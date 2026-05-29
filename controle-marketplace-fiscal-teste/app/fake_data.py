@@ -2,6 +2,8 @@ import random
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 
+from flask import current_app
+
 from app.audit import record_audit
 from app.extensions import db
 from app.models import (
@@ -27,6 +29,7 @@ from app.models import (
     User,
 )
 from app.fiscal.validators import validate_order
+from app.security import is_valid_email_format, normalize_email, password_policy_errors
 
 PRODUCT_NAMES = [
     "Cabo USB Ficticio",
@@ -138,11 +141,31 @@ def _clear_database():
 
 
 def _create_admin_user():
-    admin = User(name="Administrador Teste", email="admin@teste.com", role="admin", is_active=True)
-    admin.set_password("Teste@1234")
+    name, email, password = _initial_admin_credentials()
+    admin = User(name=name, email=email, role="admin", is_active=True)
+    admin.set_password(password)
     db.session.add(admin)
     db.session.flush()
     return admin
+
+
+def _initial_admin_credentials():
+    name = (current_app.config.get("INITIAL_ADMIN_NAME") or "Administrador").strip()
+    email = normalize_email(current_app.config.get("INITIAL_ADMIN_EMAIL"))
+    password = current_app.config.get("INITIAL_ADMIN_PASSWORD") or ""
+
+    if not email or not password:
+        raise RuntimeError(
+            "Defina INITIAL_ADMIN_EMAIL e INITIAL_ADMIN_PASSWORD antes de rodar o seed inicial."
+        )
+    if not is_valid_email_format(email):
+        raise RuntimeError("INITIAL_ADMIN_EMAIL precisa ser um email valido.")
+
+    errors = password_policy_errors(password)
+    if errors:
+        raise RuntimeError("INITIAL_ADMIN_PASSWORD nao atende a politica de senha: " + "; ".join(errors) + ".")
+
+    return name, email, password
 
 
 def _create_products():
