@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block page_title %}Produtos{% endblock %}
+{% block page_title %}Cadastro fiscal{% endblock %}
 {% block content %}
 <div class="section-header">
   <div>
-    <h1 class="section-title">Produtos ficticios</h1>
-    <div class="section-subtitle">Cadastro operacional com dados fiscais editaveis para validacao simulada.</div>
+    <h1 class="section-title">Cadastro fiscal de produtos</h1>
+    <div class="section-subtitle">Mantenha classificacao fiscal, CFOP e dados comerciais consistentes para validacao.</div>
   </div>
   {% if current_user.role in ['admin', 'operador'] %}
     <a class="btn btn-success" href="{{ url_for('products.create') }}"><i class="bi bi-plus-circle"></i> Novo produto</a>
@@ -18,7 +18,7 @@
       <input class="form-control" name="q" value="{{ request.args.get('q', '') }}" placeholder="SKU ou nome do produto">
     </div>
     <div class="col-md-4">
-      <label class="form-label">Pendencia fiscal</label>
+      <label class="form-label">Excecao fiscal</label>
       <select class="form-select" name="fiscal_gap">
         <option value="">Todas</option>
         <option value="ncm" {{ 'selected' if request.args.get('fiscal_gap') == 'ncm' else '' }}>Sem classificacao fiscal do produto (NCM)</option>
@@ -35,7 +35,7 @@
 <div class="panel p-3 p-md-4">
   <div class="panel-header">
     <div>
-      <h2 class="section-title">Catalogo fiscal simulado</h2>
+      <h2 class="section-title">Catalogo de produtos</h2>
       <div class="section-subtitle">{{ products|length }} produto(s) encontrado(s).</div>
     </div>
   </div>
@@ -44,12 +44,12 @@
       <thead>
         <tr>
           <th>SKU</th>
-          <th>Marketplace SKU</th>
+          <th>SKU origem</th>
           <th>Nome</th>
           <th>Codigo de barras</th>
           <th>Classificacao fiscal</th>
           <th>Codigo da operacao fiscal</th>
-          <th>Venda</th>
+          <th>Preco de venda</th>
           <th>Status</th>
           <th>Acoes</th>
         </tr>
@@ -85,7 +85,7 @@
               <div class="empty-state">
                 <i class="bi bi-box"></i>
                 <strong>Nenhum produto cadastrado ainda.</strong>
-                <span>Cadastre produtos ficticios para testar pedidos e validacao fiscal.</span>
+                <span>Cadastre produtos simulados para testar operacoes e validacao fiscal.</span>
               </div>
             </td>
           </tr>

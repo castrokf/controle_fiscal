@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Controle Fiscal">
+  <rect width="64" height="64" rx="12" fill="#1d4ed8"/>
+  <path d="M20 14h24a4 4 0 0 1 4 4v28a4 4 0 0 1-4 4H20a4 4 0 0 1-4-4V18a4 4 0 0 1 4-4z" fill="#ffffff" opacity=".95"/>
+  <path d="M24 24h16M24 31h16M24 38h10" stroke="#1d4ed8" stroke-width="3" stroke-linecap="round"/>
+  <path d="m37 40 4 4 8-10" fill="none" stroke="#0f766e" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

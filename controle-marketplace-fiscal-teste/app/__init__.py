@@ -34,6 +34,10 @@ def create_app(config_name=None, config_overrides=None):
             return redirect(url_for("dashboard.index"))
         return redirect(url_for("auth.login"))
 
+    @app.get("/favicon.ico")
+    def favicon():
+        return app.send_static_file("favicon.svg")
+
     return app
 
 

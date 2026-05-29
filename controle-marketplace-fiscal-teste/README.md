@@ -1,6 +1,6 @@
-# Controle Marketplace Fiscal - Ambiente de Teste
+# Controle Fiscal - Ambiente Demo
 
-MVP Flask para validar fluxo empresarial de pedidos ficticios, marketplaces ficticios, validacao fiscal simulada, dashboard, relatórios, logs, fechamento diario e geracao de XML/PDF fake.
+MVP Flask para validar fluxo de controle fiscal com operacoes simuladas, validacao fiscal, painel gerencial, documentos fiscais, indicadores, auditoria, fechamento diario e geracao de XML/PDF simulados.
 
 Este projeto e 100% ficticio.
 
@@ -102,7 +102,7 @@ Aplicar migrations:
 python -m flask --app run.py db upgrade
 ```
 
-Popular dados ficticios:
+Popular dados simulados:
 
 ```powershell
 python -m flask --app run.py seed
@@ -111,15 +111,15 @@ python -m flask --app run.py seed
 O seed cria:
 
 - 1 usuario administrador
-- 20 produtos ficticios
-- 50 pedidos ficticios Amazon
-- 50 pedidos ficticios Shopee
-- compradores, enderecos e documentos ficticios
-- notas fiscais ficticias autorizadas e rejeitadas
+- 20 produtos simulados
+- 50 operacoes Amazon
+- 50 operacoes Shopee
+- compradores, enderecos e documentos simulados
+- notas fiscais simuladas autorizadas e rejeitadas
 - pedidos sem NF-e
 - produtos sem classificacao fiscal do produto (NCM)
 - produtos sem codigo fiscal da operacao (CFOP)
-- logs e fechamentos diarios ficticios
+- logs e fechamentos diarios simulados
 
 ## Rodar localmente
 
@@ -146,7 +146,7 @@ Por seguranca, a tela de login nao mostra credenciais de exemplo.
 
 ## Testar filtro por horario
 
-No menu `Pedidos`, use:
+No menu `Operacoes`, use:
 
 ```text
 Marketplace: Amazon ou Shopee
@@ -154,16 +154,16 @@ Horario inicial: 08:00
 Horario final: 18:00
 ```
 
-Esse filtro usa o campo `order_datetime` dos pedidos ficticios.
+Esse filtro usa o campo `order_datetime` das operacoes simuladas.
 
-## Emitir NF-e ficticia
+## Emitir NF-e simulada
 
-1. Acesse `Pedidos`.
-2. Abra um pedido.
+1. Acesse `Operacoes`.
+2. Abra uma operacao.
 3. Clique em `Validar fiscal`.
-4. Clique em `Emitir NF-e ficticia`.
-5. Clique em `Gerar XML/PDF fake`.
-6. Baixe os arquivos pela tela do pedido ou por `Fiscal Simulado`.
+4. Clique em `Emitir NF-e simulada`.
+5. Clique em `Gerar XML/PDF`.
+6. Baixe os arquivos pela tela da operacao ou por `Documentos fiscais`.
 
 Os arquivos ficam em:
 
@@ -176,12 +176,12 @@ Ao clicar em `Baixar XML` ou `Baixar PDF`, o sistema gera um arquivo com corpo e
 
 - finalidade do documento de teste;
 - aviso de que nao possui validade fiscal;
-- dados do pedido ficticio;
-- comprador e endereco ficticios;
+- dados da operacao simulada;
+- comprador e endereco simulados;
 - itens;
-- valores ficticios;
+- valores simulados;
 - status fiscal simulado;
-- motivo de rejeicao ficticia, quando existir.
+- motivo de rejeicao simulada, quando existir.
 
 O PDF usa um modelo visual inspirado em DANFE para teste operacional. Ele tem quadros, cabecalho, destinatario, valores, produtos e informacoes adicionais. O arquivo real usado como referencia visual nao e copiado para dentro do projeto e nenhum dado real dele e reaproveitado.
 
@@ -191,10 +191,10 @@ No Windows local, uma copia tambem e salva em:
 C:\Users\REDFIT\Downloads\controle-marketplace-fiscal-teste
 ```
 
-## Gerar pedidos ficticios agora
+## Gerar operacoes simuladas agora
 
-1. Acesse `Configuracoes`.
-2. Clique em `Gerar pedidos ficticios agora`.
+1. Acesse `Administracao`.
+2. Clique em `Gerar operacoes simuladas`.
 
 APScheduler existe no projeto, mas fica desligado por padrao:
 
@@ -215,16 +215,16 @@ Cobertura basica:
 - bloqueio sem login
 - criacao de produto
 - seed
-- listagem de pedidos
+- listagem de operacoes
 - filtro por horario
 - validacao fiscal simulada
-- emissao de NF-e ficticia
-- geracao de XML/PDF fake
-- relatorios e CSV
+- emissao de NF-e simulada
+- geracao de XML/PDF
+- indicadores e CSV
 
 ## Seguranca implementada
 
-Este MVP e de portifolio/demo tecnica, mas ja possui uma base de seguranca mais seria:
+Este MVP e de portfolio/demo tecnica, mas ja possui uma base de seguranca mais seria:
 
 - senha inicial do admin via variaveis de ambiente, sem senha publica hardcoded;
 - tela de login sem usuario/senha de exemplo;

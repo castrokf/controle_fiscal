@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block page_title %}Fechamento Diario{% endblock %}
+{% block page_title %}Fechamento{% endblock %}
 {% block content %}
 <div class="section-header">
   <div>
-    <h1 class="section-title">Fechamento diario ficticio</h1>
-    <div class="section-subtitle">Resumo financeiro e fiscal por data e marketplace.</div>
+    <h1 class="section-title">Fechamento fiscal diario</h1>
+    <div class="section-subtitle">Resumo financeiro e fiscal por data, origem e status dos documentos.</div>
   </div>
 </div>
 
@@ -30,7 +30,7 @@
   <div class="col-md-3">
     <div class="panel metric">
       <div class="metric-top">
-        <div><div class="metric-label">NF-e autorizadas</div><div class="metric-hint">Total ficticio</div></div>
+        <div><div class="metric-label">NF-e autorizadas</div><div class="metric-hint">Total simulado</div></div>
         <div class="metric-icon success"><i class="bi bi-check-circle"></i></div>
       </div>
       <div class="metric-value">{{ closings|sum(attribute='invoices_authorized') }}</div>
@@ -39,7 +39,7 @@
   <div class="col-md-3">
     <div class="panel metric">
       <div class="metric-top">
-        <div><div class="metric-label">NF-e rejeitadas</div><div class="metric-hint">Total ficticio</div></div>
+        <div><div class="metric-label">NF-e rejeitadas</div><div class="metric-hint">Total simulado</div></div>
         <div class="metric-icon danger"><i class="bi bi-x-circle"></i></div>
       </div>
       <div class="metric-value">{{ closings|sum(attribute='invoices_rejected') }}</div>
@@ -50,8 +50,8 @@
 <div class="panel p-3 p-md-4">
   <div class="panel-header">
     <div>
-      <h2 class="section-title">Apuracao por marketplace</h2>
-      <div class="section-subtitle">Dados financeiros simulados para conferencia operacional.</div>
+      <h2 class="section-title">Apuracao por origem</h2>
+      <div class="section-subtitle">Dados financeiros simulados para conferencia fiscal.</div>
     </div>
   </div>
   <div class="table-responsive">
@@ -59,7 +59,7 @@
       <thead>
         <tr>
           <th>Data</th>
-          <th>Marketplace</th>
+          <th>Origem</th>
           <th>Pedidos</th>
           <th>Bruto</th>
           <th>Frete</th>
@@ -91,8 +91,8 @@
             <td colspan="11">
               <div class="empty-state">
                 <i class="bi bi-calendar-x"></i>
-                <strong>Nenhum fechamento ficticio encontrado.</strong>
-                <span>Rode o seed para criar fechamentos diarios de teste.</span>
+                <strong>Nenhum fechamento encontrado.</strong>
+                <span>Rode o seed para criar fechamentos diarios simulados.</span>
               </div>
             </td>
           </tr>

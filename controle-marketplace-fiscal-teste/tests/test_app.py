@@ -18,7 +18,7 @@ def test_login_with_seed_admin_credentials(client, app):
         create_user()
     response = login(client)
     assert response.status_code == 200
-    assert b"Dashboard" in response.data
+    assert b"Painel fiscal" in response.data
 
 
 def test_login_page_does_not_expose_demo_credentials(client):
@@ -26,7 +26,7 @@ def test_login_page_does_not_expose_demo_credentials(client):
     assert response.status_code == 200
     assert b"admin@teste.com" not in response.data
     assert b"Teste@1234" not in response.data
-    assert b"SenhaTeste@123456" not in response.data
+    assert b"SenhaQa@123456789" not in response.data
 
 
 def test_login_rejects_external_next_redirect(client, app):
@@ -34,7 +34,7 @@ def test_login_rejects_external_next_redirect(client, app):
         create_user()
     response = client.post(
         "/auth/login?next=https://example.com/phishing",
-        data={"email": "admin@teste.com", "password": "SenhaTeste@123456"},
+        data={"email": "usuario.qa@example.com", "password": "SenhaQa@123456789"},
         follow_redirects=False,
     )
     assert response.status_code == 302
@@ -173,7 +173,7 @@ def test_reports_and_csv_export(client, app):
     login(client)
     response = client.get("/reports/")
     assert response.status_code == 200
-    assert b"Pedidos por marketplace" in response.data
+    assert b"Operacoes por origem" in response.data
     response = client.get("/reports/export/orders.csv")
     assert response.status_code == 200
     assert response.mimetype == "text/csv"

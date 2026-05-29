@@ -80,7 +80,7 @@ def seed_database(reset=True):
         "seed.executed",
         entity_type="database",
         status="OK",
-        message="Banco populado com dados 100% ficticios para ambiente de teste.",
+        message="Banco populado com dados simulados para ambiente demo.",
         user_id=admin.id,
     )
     db.session.commit()
@@ -115,7 +115,7 @@ def generate_fake_orders(count=5, source="manual", user_id=None):
         "fake_orders.generated",
         entity_type="marketplace_order",
         status="OK",
-        message=f"{count} pedidos ficticios gerados via {source}.",
+        message=f"{count} operacoes simuladas geradas via {source}.",
         user_id=user_id,
     )
     db.session.commit()
@@ -369,7 +369,7 @@ def _create_settings():
     settings = {
         "AUTO_GENERATE_FAKE_ORDERS": "false",
         "FAKE_ORDER_INTERVAL_MINUTES": "10",
-        "ENVIRONMENT_NOTICE": "Ambiente 100% ficticio. Nao emite NF-e real.",
+        "ENVIRONMENT_NOTICE": "Ambiente demo com dados simulados. Nao emite NF-e real.",
     }
     for key, value in settings.items():
         db.session.add(SystemSetting(key=key, value=value))

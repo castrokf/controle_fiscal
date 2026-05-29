@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block page_title %}Relatorios{% endblock %}
+{% block page_title %}Indicadores{% endblock %}
 {% block content %}
 <div class="section-header">
   <div>
-    <h1 class="section-title">Relatorios operacionais</h1>
-    <div class="section-subtitle">Indicadores ficticios por marketplace, horario, produtos e status fiscal.</div>
+    <h1 class="section-title">Indicadores fiscais</h1>
+    <div class="section-subtitle">Visao gerencial por origem, horario, produtos e status fiscal.</div>
   </div>
   <a class="btn btn-success" href="{{ url_for('reports.export_orders_csv') }}"><i class="bi bi-filetype-csv"></i> Exportar pedidos CSV</a>
 </div>
@@ -13,7 +13,7 @@
   <div class="col-md-3">
     <div class="panel metric">
       <div class="metric-top">
-        <div><div class="metric-label">Faturamento diario</div><div class="metric-hint">Valor bruto ficticio</div></div>
+        <div><div class="metric-label">Faturamento diario</div><div class="metric-hint">Valor bruto simulado</div></div>
         <div class="metric-icon success"><i class="bi bi-cash-stack"></i></div>
       </div>
       <div class="metric-value">{{ report.daily_revenue|money_br }}</div>
@@ -31,7 +31,7 @@
   <div class="col-md-3">
     <div class="panel metric">
       <div class="metric-top">
-        <div><div class="metric-label">NF-e autorizadas</div><div class="metric-hint">Autorizacao ficticia</div></div>
+        <div><div class="metric-label">NF-e autorizadas</div><div class="metric-hint">Autorizacao simulada</div></div>
         <div class="metric-icon success"><i class="bi bi-check-circle"></i></div>
       </div>
       <div class="metric-value">{{ report.authorized_invoices }}</div>
@@ -40,7 +40,7 @@
   <div class="col-md-3">
     <div class="panel metric">
       <div class="metric-top">
-        <div><div class="metric-label">NF-e rejeitadas</div><div class="metric-hint">Rejeicao simulada</div></div>
+        <div><div class="metric-label">NF-e rejeitadas</div><div class="metric-hint">Exigem revisao</div></div>
         <div class="metric-icon danger"><i class="bi bi-x-circle"></i></div>
       </div>
       <div class="metric-value">{{ report.rejected_invoices }}</div>
@@ -53,18 +53,18 @@
     <div class="panel p-3 p-md-4 h-100">
       <div class="panel-header">
         <div>
-          <h2 class="section-title">Pedidos por marketplace</h2>
-          <div class="section-subtitle">Volume e faturamento ficticio por canal.</div>
+          <h2 class="section-title">Operacoes por origem</h2>
+          <div class="section-subtitle">Volume e faturamento simulado por canal.</div>
         </div>
       </div>
       <div class="table-responsive">
         <table class="table table-hover align-middle">
-          <thead><tr><th>Marketplace</th><th>Pedidos</th><th>Faturamento</th></tr></thead>
+          <thead><tr><th>Origem</th><th>Operacoes</th><th>Faturamento</th></tr></thead>
           <tbody>
             {% for marketplace, count, revenue in report.by_marketplace %}
               <tr><td><span class="status-badge status-primary"><i class="bi bi-shop"></i>{{ marketplace }}</span></td><td>{{ count }}</td><td><strong>{{ revenue|money_br }}</strong></td></tr>
             {% else %}
-              <tr><td colspan="3"><div class="empty-state"><i class="bi bi-inbox"></i><strong>Nenhum dado por marketplace.</strong><span>Rode o seed para popular dados ficticios.</span></div></td></tr>
+              <tr><td colspan="3"><div class="empty-state"><i class="bi bi-inbox"></i><strong>Nenhum dado por origem.</strong><span>Rode o seed para popular dados simulados.</span></div></td></tr>
             {% endfor %}
           </tbody>
         </table>
@@ -86,7 +86,7 @@
             {% for row in report.by_hour %}
               <tr><td><strong>{{ row.range }}</strong></td><td>{{ row.count }}</td></tr>
             {% else %}
-              <tr><td colspan="2"><div class="empty-state"><i class="bi bi-clock"></i><strong>Nenhum dado por horario.</strong><span>Os pedidos ficticios aparecerao aqui.</span></div></td></tr>
+              <tr><td colspan="2"><div class="empty-state"><i class="bi bi-clock"></i><strong>Nenhum dado por horario.</strong><span>As operacoes simuladas aparecerao aqui.</span></div></td></tr>
             {% endfor %}
           </tbody>
         </table>
@@ -98,7 +98,7 @@
       <div class="panel-header">
         <div>
           <h2 class="section-title">Produtos mais vendidos</h2>
-          <div class="section-subtitle">Ranking por quantidade vendida ficticia.</div>
+          <div class="section-subtitle">Ranking por quantidade vendida simulada.</div>
         </div>
       </div>
       <div class="table-responsive">
@@ -120,7 +120,7 @@
       <div class="panel-header">
         <div>
           <h2 class="section-title">Pendencias fiscais em produtos</h2>
-          <div class="section-subtitle">Produtos que podem causar rejeicao simulada.</div>
+          <div class="section-subtitle">Produtos que podem gerar rejeicao ou bloqueio fiscal.</div>
         </div>
       </div>
       <div class="row g-3">

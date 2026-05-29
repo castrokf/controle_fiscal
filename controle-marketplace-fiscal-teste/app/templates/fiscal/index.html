@@ -1,19 +1,19 @@
 {% extends "base.html" %}
 {% from "orders/macros.html" import status_badge %}
-{% block page_title %}Fiscal Simulado{% endblock %}
+{% block page_title %}Documentos fiscais{% endblock %}
 {% block content %}
 <div class="section-header">
   <div>
-    <h1 class="section-title">Fiscal simulado</h1>
-    <div class="section-subtitle">Acompanhe NF-e ficticias, rejeicoes simuladas e arquivos XML/PDF fake.</div>
+    <h1 class="section-title">Documentos fiscais</h1>
+    <div class="section-subtitle">Acompanhe NF-e simuladas, rejeicoes, pendencias e arquivos XML/PDF de conferencia.</div>
   </div>
 </div>
 
 <div class="panel p-3 p-md-4">
   <div class="panel-header">
     <div>
-      <h2 class="section-title">Notas fiscais ficticias</h2>
-      <div class="section-subtitle">{{ invoices|length }} registro(s) fiscal(is) encontrado(s).</div>
+      <h2 class="section-title">Monitor fiscal</h2>
+      <div class="section-subtitle">{{ invoices|length }} documento(s) fiscal(is) encontrado(s).</div>
     </div>
   </div>
   <div class="table-responsive">
@@ -22,7 +22,7 @@
         <tr>
           <th>Criacao</th>
           <th>Pedido</th>
-          <th>Marketplace</th>
+          <th>Origem</th>
           <th>Numero</th>
           <th>Serie</th>
           <th>Status</th>
@@ -58,7 +58,7 @@
                   <span class="status-badge status-danger"><i class="bi bi-geo-alt"></i> Endereco incompleto</span>
                 {% endif %}
                 {% if invoice.rejection_reason %}
-                  <span class="status-badge status-danger"><i class="bi bi-x-circle"></i> Rejeicao ficticia</span>
+                  <span class="status-badge status-danger"><i class="bi bi-x-circle"></i> Rejeicao</span>
                 {% endif %}
                 {% if not missing_ncm and not missing_cfop and invoice.order.buyer and invoice.order.buyer.addresses and not invoice.rejection_reason %}
                   <span class="status-badge status-success"><i class="bi bi-check-circle"></i> Sem pendencias</span>
@@ -86,8 +86,8 @@
             <td colspan="9">
               <div class="empty-state">
                 <i class="bi bi-file-earmark-text"></i>
-                <strong>Nenhuma NF-e ficticia encontrada.</strong>
-                <span>Emita notas ficticias a partir da tela de detalhe do pedido.</span>
+                <strong>Nenhuma NF-e simulada encontrada.</strong>
+                <span>Emita documentos a partir do dossie fiscal da operacao.</span>
               </div>
             </td>
           </tr>

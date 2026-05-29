@@ -74,7 +74,7 @@ def validate(order_id):
     if errors:
         flash("Validacao fiscal simulada encontrou pendencias.", "danger")
     else:
-        flash("Pedido pronto para emissao ficticia.", "success")
+        flash("Operacao pronta para emissao simulada.", "success")
     return redirect(url_for("orders.detail", order_id=order.id))
 
 
@@ -85,9 +85,9 @@ def issue(order_id):
     order = db.get_or_404(MarketplaceOrder, order_id)
     invoice = NFeService().issue_fake_invoice(order)
     if "AUTORIZADA" in invoice.status:
-        flash("NF-e ficticia autorizada no ambiente de teste.", "success")
+        flash("NF-e simulada autorizada no ambiente demo.", "success")
     else:
-        flash("NF-e ficticia rejeitada no ambiente de teste.", "danger")
+        flash("NF-e simulada rejeitada no ambiente demo.", "danger")
     return redirect(url_for("orders.detail", order_id=order.id))
 
 
@@ -97,10 +97,10 @@ def issue(order_id):
 def generate_files(order_id):
     order = db.get_or_404(MarketplaceOrder, order_id)
     if not order.invoice:
-        flash("Emita uma NF-e ficticia antes de gerar XML/PDF fake.", "warning")
+        flash("Emita uma NF-e simulada antes de gerar XML/PDF.", "warning")
         return redirect(url_for("orders.detail", order_id=order.id))
     NFeService().generate_fake_files(order.invoice)
-    flash("XML e PDF fake gerados com sucesso.", "success")
+    flash("XML e PDF gerados com sucesso.", "success")
     return redirect(url_for("orders.detail", order_id=order.id))
 
 

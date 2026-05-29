@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% from "orders/macros.html" import status_badge %}
-{% block page_title %}Logs{% endblock %}
+{% block page_title %}Auditoria{% endblock %}
 {% block content %}
 <div class="section-header">
   <div>
-    <h1 class="section-title">Logs e auditoria</h1>
-    <div class="section-subtitle">Historico tecnico das acoes executadas no ambiente de teste.</div>
+    <h1 class="section-title">Auditoria e rastreabilidade</h1>
+    <div class="section-subtitle">Historico das acoes executadas, usuarios envolvidos e entidades afetadas.</div>
   </div>
 </div>
 
@@ -13,7 +13,7 @@
   <form method="get" class="row g-3 align-items-end">
     <div class="col-md-4">
       <label class="form-label">Acao</label>
-      <input class="form-control" name="action" value="{{ request.args.get('action', '') }}" placeholder="invoice.issue_fake">
+      <input class="form-control" name="action" value="{{ request.args.get('action', '') }}" placeholder="invoice.issue">
     </div>
     <div class="col-md-3">
       <label class="form-label">Status</label>
@@ -37,7 +37,7 @@
 <div class="panel p-3 p-md-4">
   <div class="panel-header">
     <div>
-      <h2 class="section-title">Eventos registrados</h2>
+      <h2 class="section-title">Eventos de auditoria</h2>
       <div class="section-subtitle">{{ logs|length }} log(s) encontrado(s).</div>
     </div>
   </div>
@@ -68,7 +68,7 @@
             <td colspan="6">
               <div class="empty-state">
                 <i class="bi bi-journal-x"></i>
-                <strong>Nenhum log registrado.</strong>
+                <strong>Nenhum evento registrado.</strong>
                 <span>As acoes do sistema aparecerao aqui para auditoria.</span>
               </div>
             </td>

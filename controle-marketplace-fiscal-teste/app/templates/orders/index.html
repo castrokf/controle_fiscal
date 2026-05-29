@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% from "orders/macros.html" import status_badge %}
-{% block page_title %}Pedidos{% endblock %}
+{% block page_title %}Operacoes{% endblock %}
 {% block content %}
 <div class="section-header">
   <div>
-    <h1 class="section-title">Pedidos centralizados</h1>
-    <div class="section-subtitle">Consulte pedidos ficticios Amazon e Shopee com filtros por data, horario, SKU e status.</div>
+    <h1 class="section-title">Operacoes para conferencia</h1>
+    <div class="section-subtitle">Consulte operacoes simuladas por origem, periodo, SKU, cliente e status fiscal.</div>
   </div>
 </div>
 
@@ -13,7 +13,7 @@
   <form method="get">
     <div class="filter-grid">
       <div>
-        <label class="form-label">Marketplace</label>
+        <label class="form-label">Origem</label>
         <select class="form-select" name="marketplace">
           <option value="">Todos</option>
           <option value="Amazon" {{ 'selected' if filters.get('marketplace') == 'Amazon' else '' }}>Amazon</option>
@@ -37,7 +37,7 @@
         <input class="form-control" type="time" name="time_end" value="{{ filters.get('time_end', '') }}">
       </div>
       <div>
-        <label class="form-label">Status pedido</label>
+        <label class="form-label">Status comercial</label>
         <input class="form-control" name="order_status" value="{{ filters.get('order_status', '') }}" placeholder="PAGO">
       </div>
       <div>
@@ -49,11 +49,11 @@
         <input class="form-control" name="sku" value="{{ filters.get('sku', '') }}" placeholder="SKU-FICT-001">
       </div>
       <div>
-        <label class="form-label">Cliente ficticio</label>
+        <label class="form-label">Cliente</label>
         <input class="form-control" name="buyer" value="{{ filters.get('buyer', '') }}" placeholder="Nome do cliente">
       </div>
       <div>
-        <label class="form-label">Numero do pedido</label>
+        <label class="form-label">Numero da operacao</label>
         <input class="form-control" name="order_number" value="{{ filters.get('order_number', '') }}" placeholder="AMZ ou SHP">
       </div>
     </div>
@@ -68,7 +68,7 @@
   <div class="panel-header">
     <div>
       <h2 class="section-title">Resultado da consulta</h2>
-      <div class="section-subtitle">{{ orders|length }} pedido(s) encontrado(s).</div>
+      <div class="section-subtitle">{{ orders|length }} operacao(oes) encontrada(s).</div>
     </div>
   </div>
   <div class="table-responsive">
@@ -76,11 +76,11 @@
       <thead>
         <tr>
           <th>Data/hora</th>
-          <th>Marketplace</th>
-          <th>Pedido</th>
+          <th>Origem</th>
+          <th>Operacao</th>
           <th>Cliente</th>
           <th>Valor total</th>
-          <th>Status pedido</th>
+          <th>Status comercial</th>
           <th>Status fiscal</th>
           <th>Acoes</th>
         </tr>
@@ -102,8 +102,8 @@
             <td colspan="8">
               <div class="empty-state">
                 <i class="bi bi-search"></i>
-                <strong>Nenhum pedido encontrado para os filtros selecionados.</strong>
-                <span>Ajuste os filtros ou gere pedidos ficticios em Configuracoes.</span>
+                <strong>Nenhuma operacao encontrada para os filtros selecionados.</strong>
+                <span>Ajuste os filtros ou gere dados simulados em Administracao.</span>
               </div>
             </td>
           </tr>

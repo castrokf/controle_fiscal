@@ -20,5 +20,5 @@ def index():
 @roles_required("admin", "operador")
 def generate_fake_orders_now():
     generate_fake_orders(count=5, source="manual_button", user_id=current_user.id)
-    flash("5 pedidos ficticios foram gerados.", "success")
+    flash("5 operacoes simuladas foram geradas.", "success")
     return redirect(url_for("orders.index"))

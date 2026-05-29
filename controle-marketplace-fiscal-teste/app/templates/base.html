@@ -3,43 +3,48 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Controle Marketplace Fiscal{% endblock %}</title>
+    <title>{% block title %}Controle Fiscal{% endblock %}</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/app.css') }}" rel="stylesheet">
   </head>
   <body>
     {% if current_user.is_authenticated %}
+      <div class="sidebar-backdrop" data-sidebar-close></div>
       <div class="layout">
-        <aside class="sidebar">
+        <aside class="sidebar" id="app-sidebar">
           <div class="brand">
             <div class="brand-row">
               <div class="brand-icon"><i class="bi bi-receipt-cutoff"></i></div>
               <div>
-                <div class="brand-title">Controle Marketplace Fiscal</div>
-                <div class="brand-subtitle">Painel operacional de teste</div>
+                <div class="brand-title">Controle Fiscal</div>
+                <div class="brand-subtitle">Compliance e documentos</div>
               </div>
             </div>
-            <div class="env-badge"><i class="bi bi-shield-check"></i> Ambiente de Teste</div>
-            <div class="sidebar-note">Dados ficticios. Nenhuma NF-e real e emitida, nenhuma API real e chamada.</div>
+            <div class="env-badge"><i class="bi bi-shield-check"></i> Ambiente Demo</div>
+            <div class="sidebar-note">Dados simulados para validacao de fluxo fiscal. Nenhuma NF-e real e emitida.</div>
           </div>
           {% set endpoint = request.endpoint or '' %}
           <nav class="nav flex-column">
-            <a class="nav-link {{ 'active' if endpoint.startswith('dashboard.') else '' }}" href="{{ url_for('dashboard.index') }}"><i class="bi bi-speedometer2"></i> Dashboard</a>
-            <a class="nav-link {{ 'active' if endpoint.startswith('orders.') else '' }}" href="{{ url_for('orders.index') }}"><i class="bi bi-bag-check"></i> Pedidos</a>
-            <a class="nav-link {{ 'active' if endpoint.startswith('products.') else '' }}" href="{{ url_for('products.index') }}"><i class="bi bi-box-seam"></i> Produtos</a>
-            <a class="nav-link {{ 'active' if endpoint.startswith('fiscal.') else '' }}" href="{{ url_for('fiscal.index') }}"><i class="bi bi-file-earmark-text"></i> Fiscal Simulado</a>
-            <a class="nav-link {{ 'active' if endpoint.startswith('reports.') else '' }}" href="{{ url_for('reports.index') }}"><i class="bi bi-bar-chart-line"></i> Relatorios</a>
-            <a class="nav-link {{ 'active' if endpoint.startswith('closing.') else '' }}" href="{{ url_for('closing.index') }}"><i class="bi bi-calendar2-check"></i> Fechamento Diario</a>
-            <a class="nav-link {{ 'active' if endpoint.startswith('logs.') else '' }}" href="{{ url_for('logs.index') }}"><i class="bi bi-clock-history"></i> Logs</a>
-            <a class="nav-link {{ 'active' if endpoint.startswith('settings.') else '' }}" href="{{ url_for('settings.index') }}"><i class="bi bi-sliders"></i> Configuracoes</a>
+            <a class="nav-link {{ 'active' if endpoint.startswith('dashboard.') else '' }}" href="{{ url_for('dashboard.index') }}"><i class="bi bi-grid-1x2"></i> Painel fiscal</a>
+            <a class="nav-link {{ 'active' if endpoint.startswith('orders.') else '' }}" href="{{ url_for('orders.index') }}"><i class="bi bi-receipt"></i> Operacoes</a>
+            <a class="nav-link {{ 'active' if endpoint.startswith('products.') else '' }}" href="{{ url_for('products.index') }}"><i class="bi bi-boxes"></i> Cadastro fiscal</a>
+            <a class="nav-link {{ 'active' if endpoint.startswith('fiscal.') else '' }}" href="{{ url_for('fiscal.index') }}"><i class="bi bi-file-earmark-check"></i> Documentos fiscais</a>
+            <a class="nav-link {{ 'active' if endpoint.startswith('reports.') else '' }}" href="{{ url_for('reports.index') }}"><i class="bi bi-bar-chart-line"></i> Indicadores</a>
+            <a class="nav-link {{ 'active' if endpoint.startswith('closing.') else '' }}" href="{{ url_for('closing.index') }}"><i class="bi bi-calendar2-check"></i> Fechamento</a>
+            <a class="nav-link {{ 'active' if endpoint.startswith('logs.') else '' }}" href="{{ url_for('logs.index') }}"><i class="bi bi-shield-lock"></i> Auditoria</a>
+            <a class="nav-link {{ 'active' if endpoint.startswith('settings.') else '' }}" href="{{ url_for('settings.index') }}"><i class="bi bi-sliders2"></i> Administracao</a>
           </nav>
         </aside>
         <main class="main">
           <div class="topbar">
+            <button class="icon-button mobile-menu-button" type="button" data-sidebar-toggle aria-controls="app-sidebar" aria-label="Abrir menu">
+              <i class="bi bi-list"></i>
+            </button>
             <div class="page-heading">
               <strong>{% block page_title %}Painel{% endblock %}</strong>
-              <div class="page-kicker">Dados ficticios para validacao de fluxo operacional</div>
+              <div class="page-kicker">Controle de excecoes, documentos e fechamento fiscal</div>
             </div>
             <div class="topbar-user">
               <div class="user-pill">
@@ -77,5 +82,6 @@
       {% block auth_content %}{% endblock %}
     {% endif %}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
   </body>
 </html>

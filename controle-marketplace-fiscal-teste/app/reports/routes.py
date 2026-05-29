@@ -87,7 +87,7 @@ def export_orders_csv():
     return Response(
         output.getvalue(),
         mimetype="text/csv",
-        headers={"Content-Disposition": "attachment; filename=pedidos-ficticios.csv"},
+        headers={"Content-Disposition": "attachment; filename=operacoes-fiscais-demo.csv"},
     )
 
 

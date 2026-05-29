@@ -27,7 +27,7 @@ class NFeService:
                 entity_type="marketplace_order",
                 entity_id=order.id,
                 status="OK",
-                message="Pedido ficticio pronto para emissao simulada.",
+                message="Operacao pronta para emissao simulada.",
             )
         db.session.commit()
         return errors
@@ -42,7 +42,7 @@ class NFeService:
             entity_type="invoice",
             entity_id=invoice.id,
             status=status,
-            message=f"Emissao ficticia concluida com status {invoice.status}.",
+            message=f"Emissao simulada concluida com status {invoice.status}.",
         )
         db.session.commit()
         return invoice
@@ -55,7 +55,7 @@ class NFeService:
             entity_type="invoice",
             entity_id=invoice.id,
             status="OK",
-            message="XML e PDF fake gerados para a nota ficticia.",
+            message="XML e PDF simulados gerados para a nota.",
         )
         db.session.commit()
         return xml_path, pdf_path

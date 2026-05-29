@@ -1,18 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Login - Controle Marketplace Fiscal{% endblock %}
+{% block title %}Login - Controle Fiscal{% endblock %}
 {% block auth_content %}
 <div class="auth-page">
   <div class="auth-box p-4 p-md-5">
     <div class="d-flex align-items-center gap-3 mb-4">
       <div class="auth-mark"><i class="bi bi-receipt-cutoff"></i></div>
       <div>
-        <h1 class="h4 mb-1 fw-bold">Controle Marketplace Fiscal</h1>
-        <div class="text-muted-small">Ambiente de teste com dados ficticios</div>
+        <h1 class="h4 mb-1 fw-bold">Controle Fiscal</h1>
+        <div class="text-muted-small">Acesso seguro ao ambiente demo</div>
       </div>
     </div>
     <div class="alert alert-info app-alert mb-4">
       <i class="bi bi-info-circle"></i>
-      <div>Nenhuma NF-e real e emitida. Use apenas dados simulados.</div>
+      <div>Ambiente com dados simulados. Nenhuma NF-e real e emitida.</div>
     </div>
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}

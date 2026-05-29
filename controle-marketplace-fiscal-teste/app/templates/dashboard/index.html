@@ -1,23 +1,45 @@
 {% extends "base.html" %}
 {% from "orders/macros.html" import status_badge %}
-{% block page_title %}Dashboard{% endblock %}
+{% block page_title %}Painel fiscal{% endblock %}
 {% block content %}
 <div class="section-header">
   <div>
-    <h1 class="section-title">Visao geral operacional</h1>
-    <div class="section-subtitle">Resumo dos pedidos ficticios, pendencias fiscais e faturamento do dia.</div>
+    <h1 class="section-title">Visao fiscal consolidada</h1>
+    <div class="section-subtitle">Acompanhamento de documentos, excecoes, cadastros fiscais e fechamento operacional.</div>
   </div>
-  <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('reports.index') }}"><i class="bi bi-bar-chart-line"></i> Ver relatorios</a>
+  <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('reports.index') }}"><i class="bi bi-bar-chart-line"></i> Ver indicadores</a>
+</div>
+
+<div class="insight-strip">
+  <div class="insight-item">
+    <i class="bi bi-diagram-3"></i>
+    <div>
+      <div class="insight-title">Dados centralizados</div>
+      <div class="insight-text">Pedidos, documentos e cadastros fiscais em uma unica rotina de conferencia.</div>
+    </div>
+  </div>
+  <div class="insight-item">
+    <i class="bi bi-shield-check"></i>
+    <div>
+      <div class="insight-title">Controle de excecoes</div>
+      <div class="insight-text">Pendencias de NCM, CFOP, comprador e rejeicoes ficam visiveis antes do fechamento.</div>
+    </div>
+  </div>
+  <div class="insight-item">
+    <i class="bi bi-journal-check"></i>
+    <div>
+      <div class="insight-title">Auditoria rastreavel</div>
+      <div class="insight-text">Acoes fiscais simuladas geram historico para revisao e evidencias operacionais.</div>
+    </div>
+  </div>
 </div>
 
 <div class="row g-3 mb-4">
   {% set overview_cards = [
-    ('Pedidos hoje', stats.orders_today, 'bi-bag-check', 'primary', 'Total de pedidos recebidos'),
-    ('Amazon hoje', stats.amazon_today, 'bi-shop', 'primary', 'Pedidos ficticios Amazon'),
-    ('Shopee hoje', stats.shopee_today, 'bi-basket', 'primary', 'Pedidos ficticios Shopee'),
-    ('Faturamento do dia', stats.revenue_today|money_br, 'bi-cash-stack', 'success', 'Receita bruta ficticia'),
-    ('Amazon faturamento', stats.revenue_by_marketplace.Amazon|money_br, 'bi-graph-up', 'success', 'Faturamento ficticio'),
-    ('Shopee faturamento', stats.revenue_by_marketplace.Shopee|money_br, 'bi-graph-up-arrow', 'success', 'Faturamento ficticio')
+    ('Operacoes totais', stats.total_orders, 'bi-receipt', 'primary', 'Base operacional carregada'),
+    ('Documentos autorizados', stats.authorized_invoices, 'bi-file-earmark-check', 'success', 'NF-e simuladas aprovadas'),
+    ('Excecoes abertas', stats.exception_total, 'bi-exclamation-triangle', 'warning', 'Rejeicoes e cadastros pendentes'),
+    ('Faturamento de hoje', stats.revenue_today|money_br, 'bi-cash-stack', 'success', 'Valor bruto simulado')
   ] %}
   {% for label, value, icon, tone, hint in overview_cards %}
     <div class="col-12 col-sm-6 col-xl-3">
@@ -35,54 +57,67 @@
   {% endfor %}
 </div>
 
-<div class="section-header">
-  <div>
-    <h2 class="section-title">Pendencias fiscais</h2>
-    <div class="section-subtitle">Itens que precisam de conferencia antes da emissao simulada.</div>
-  </div>
-</div>
 <div class="row g-3 mb-4">
-  {% set fiscal_cards = [
-    ('NF-e pendentes', stats.pending_invoices, 'bi-hourglass-split', 'warning', 'Pedidos aguardando emissao'),
-    ('NF-e autorizadas', stats.authorized_invoices, 'bi-check-circle', 'success', 'Notas ficticias autorizadas'),
-    ('NF-e rejeitadas', stats.rejected_invoices, 'bi-x-circle', 'danger', 'Notas ficticias com erro'),
-    ('Produtos sem classificacao fiscal', stats.products_without_ncm, 'bi-exclamation-triangle', 'warning', 'Campo NCM pendente'),
-    ('Produtos sem codigo da operacao fiscal', stats.products_without_cfop, 'bi-exclamation-diamond', 'warning', 'Campo CFOP pendente')
-  ] %}
-  {% for label, value, icon, tone, hint in fiscal_cards %}
-    <div class="col-12 col-sm-6 col-xl-3">
-      <div class="panel metric">
-        <div class="metric-top">
-          <div>
-            <div class="metric-label">{{ label }}</div>
-            <div class="metric-hint">{{ hint }}</div>
-          </div>
-          <div class="metric-icon {{ tone }}"><i class="bi {{ icon }}"></i></div>
+  <div class="col-lg-4">
+    <div class="panel p-3 p-md-4 h-100">
+      <div class="panel-header">
+        <div>
+          <h2 class="section-title">Indice de conformidade</h2>
+          <div class="section-subtitle">Percentual de operacoes com documento autorizado.</div>
         </div>
-        <div class="metric-value">{{ value }}</div>
+        <span class="status-badge status-primary">{{ stats.compliance_rate }}%</span>
       </div>
+      <div class="progress-rail" aria-hidden="true">
+        <div class="progress-fill rate-{{ (stats.compliance_rate // 10) * 10 }}"></div>
+      </div>
+      <div class="text-muted-small mt-3">{{ stats.authorized_invoices }} de {{ stats.total_orders }} operacao(oes) com NF-e simulada autorizada.</div>
     </div>
-  {% endfor %}
+  </div>
+  <div class="col-lg-8">
+    <div class="row g-3">
+      {% set fiscal_cards = [
+        ('Sem NF-e', stats.pending_invoices, 'bi-hourglass-split', 'warning', 'Aguardando emissao'),
+        ('Rejeitadas', stats.rejected_invoices, 'bi-x-circle', 'danger', 'Exigem revisao'),
+        ('Dados incompletos', stats.incomplete_orders, 'bi-clipboard-x', 'warning', 'Bloqueiam emissao'),
+        ('Produtos sem NCM', stats.products_without_ncm, 'bi-tags', 'warning', 'Cadastro fiscal pendente'),
+        ('Produtos sem CFOP', stats.products_without_cfop, 'bi-signpost-split', 'warning', 'Operacao fiscal pendente')
+      ] %}
+      {% for label, value, icon, tone, hint in fiscal_cards %}
+        <div class="col-12 col-sm-6 col-xl">
+          <div class="panel metric">
+            <div class="metric-top">
+              <div>
+                <div class="metric-label">{{ label }}</div>
+                <div class="metric-hint">{{ hint }}</div>
+              </div>
+              <div class="metric-icon {{ tone }}"><i class="bi {{ icon }}"></i></div>
+            </div>
+            <div class="metric-value">{{ value }}</div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
 </div>
 
 <div class="panel p-3 p-md-4">
   <div class="panel-header">
     <div>
-      <h2 class="section-title">Movimentacao recente</h2>
-      <div class="section-subtitle">Ultimos pedidos ficticios centralizados no painel.</div>
+      <h2 class="section-title">Fila operacional recente</h2>
+      <div class="section-subtitle">Ultimas operacoes simuladas para revisao fiscal.</div>
     </div>
-    <a class="btn btn-primary btn-sm" href="{{ url_for('orders.index') }}"><i class="bi bi-arrow-right"></i> Ver pedidos</a>
+    <a class="btn btn-primary btn-sm" href="{{ url_for('orders.index') }}"><i class="bi bi-arrow-right"></i> Abrir operacoes</a>
   </div>
   <div class="table-responsive">
     <table class="table table-hover align-middle">
       <thead>
         <tr>
           <th>Horario</th>
-          <th>Marketplace</th>
-          <th>Pedido</th>
+          <th>Origem</th>
+          <th>Operacao</th>
           <th>Cliente</th>
           <th>Valor</th>
-          <th>Status pedido</th>
+          <th>Status comercial</th>
           <th>Status fiscal</th>
           <th>Acoes</th>
         </tr>
@@ -104,8 +139,8 @@
             <td colspan="8">
               <div class="empty-state">
                 <i class="bi bi-inbox"></i>
-                <strong>Nenhum pedido ficticio encontrado.</strong>
-                <span>Gere dados ficticios para testar o painel.</span>
+                <strong>Nenhuma operacao encontrada.</strong>
+                <span>Gere dados simulados para validar o fluxo fiscal.</span>
               </div>
             </td>
           </tr>

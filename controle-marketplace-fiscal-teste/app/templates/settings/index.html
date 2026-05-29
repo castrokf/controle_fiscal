@@ -1,23 +1,23 @@
 {% extends "base.html" %}
-{% block page_title %}Configuracoes{% endblock %}
+{% block page_title %}Administracao{% endblock %}
 {% block content %}
 <div class="section-header">
   <div>
-    <h1 class="section-title">Configuracoes do ambiente</h1>
-    <div class="section-subtitle">Parametros de teste, geracao ficticia e comportamento local.</div>
+    <h1 class="section-title">Administracao do ambiente</h1>
+    <div class="section-subtitle">Parametros operacionais, geracao de dados simulados e comportamento local.</div>
   </div>
 </div>
 
 <div class="panel p-3 p-md-4 mb-3">
   <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
     <div>
-      <h2 class="section-title">Geracao ficticia</h2>
-      <div class="section-subtitle">A automacao recorrente via APScheduler fica desativada por padrao.</div>
+      <h2 class="section-title">Carga de demonstracao</h2>
+      <div class="section-subtitle">A automacao recorrente via APScheduler permanece desativada por padrao.</div>
     </div>
     {% if current_user.role in ['admin', 'operador'] %}
       <form method="post" action="{{ url_for('settings.generate_fake_orders_now') }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button class="btn btn-primary" type="submit"><i class="bi bi-plus-circle"></i> Gerar pedidos ficticios agora</button>
+        <button class="btn btn-primary" type="submit"><i class="bi bi-plus-circle"></i> Gerar operacoes simuladas</button>
       </form>
     {% endif %}
   </div>
@@ -27,7 +27,7 @@
   <div class="panel-header">
     <div>
       <h2 class="section-title">Parametros cadastrados</h2>
-      <div class="section-subtitle">Valores usados pelo ambiente de teste local.</div>
+      <div class="section-subtitle">Valores usados pelo ambiente demo.</div>
     </div>
   </div>
   <div class="table-responsive">

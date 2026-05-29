@@ -15,8 +15,8 @@ def build_fake_danfe_pdf(invoice):
     buyer = order.buyer
     address = buyer.addresses[0] if buyer and buyer.addresses else None
 
-    pdf.setTitle("Nota fiscal ficticia - ambiente de teste")
-    pdf.setAuthor("Controle Marketplace Fiscal - Ambiente de Teste")
+    pdf.setTitle("Nota fiscal simulada - ambiente demo")
+    pdf.setAuthor("Controle Fiscal - Ambiente Demo")
     _draw_page_frame(pdf, width, height)
     _draw_receipt_strip(pdf, width, height, invoice)
     _draw_header(pdf, width, height, invoice)
@@ -57,9 +57,9 @@ def _draw_header(pdf, width, height, invoice):
     right_w = width - right_x - 24
 
     _box(pdf, 24, y - 92, left_w, 92, "EMITENTE FICTICIO")
-    _text(pdf, 30, y - 22, "CONTROLE MARKETPLACE FISCAL - AMBIENTE DE TESTE", 9, bold=True)
+    _text(pdf, 30, y - 22, "CONTROLE FISCAL - AMBIENTE DEMO", 9, bold=True)
     _text(pdf, 30, y - 37, "Rua Ficticia do Sistema, 100 - Cidade Teste/BR", 8)
-    _text(pdf, 30, y - 52, "CNPJ ficticio: 00.000.000/0000-00", 8)
+    _text(pdf, 30, y - 52, "CNPJ simulado: 00.000.000/0000-00", 8)
     _text(pdf, 30, y - 67, "Nao representa empresa real. Nenhuma API fiscal real foi chamada.", 7)
 
     _box(pdf, right_x, y - 92, right_w, 92)
@@ -153,7 +153,7 @@ def _draw_transport(pdf, width, height):
     y = height - 470
     _section_title(pdf, 24, y + 9, "TRANSPORTADOR / VOLUMES TRANSPORTADOS - FICTICIO")
     _box(pdf, 24, y - 28, 220, 28, "RAZAO SOCIAL")
-    _text(pdf, 30, y - 19, "Transportadora ficticia de teste", 8)
+    _text(pdf, 30, y - 19, "Transportadora simulada", 8)
     _box(pdf, 244, y - 28, 105, 28, "FRETE POR CONTA")
     _text(pdf, 250, y - 19, "0 - Emitente", 8)
     _box(pdf, 349, y - 28, 80, 28, "QUANTIDADE")
@@ -192,7 +192,7 @@ def _draw_items(pdf, width, height, order):
         _text(pdf, 532, row_y - 15, _br_money(item.total_price), 6)
         row_y -= 24
     if len(order.items) > 7:
-        _text(pdf, 28, row_y - 15, f"Mais {len(order.items) - 7} item(ns) ficticio(s) omitido(s) nesta visualizacao.", 7)
+        _text(pdf, 28, row_y - 15, f"Mais {len(order.items) - 7} item(ns) simulado(s) omitido(s) nesta visualizacao.", 7)
 
 
 def _draw_additional_info(pdf, width, height, invoice):
@@ -201,13 +201,13 @@ def _draw_additional_info(pdf, width, height, invoice):
     _section_title(pdf, 24, y + 9, "DADOS ADICIONAIS / CORPO DA SIMULACAO")
     _box(pdf, 24, 56, width - 48, 116)
     lines = [
-        "FINALIDADE: validar o fluxo de download, conferencia, armazenamento e auditoria de notas fiscais ficticias.",
+        "FINALIDADE: validar o fluxo de download, conferencia, armazenamento e auditoria de notas fiscais simuladas.",
         "AVISO: documento sem validade fiscal, nao enviado para SEFAZ, sem certificado digital e sem emissao real.",
-        f"Marketplace: {order.marketplace}. Pedido ficticio: {order.marketplace_order_id}.",
-        f"Receita liquida ficticia: {_br_money(order.net_amount)}.",
+        f"Origem: {order.marketplace}. Operacao simulada: {order.marketplace_order_id}.",
+        f"Receita liquida simulada: {_br_money(order.net_amount)}.",
     ]
     if invoice.rejection_reason:
-        lines.append(f"Motivo de rejeicao ficticia: {invoice.rejection_reason}")
+        lines.append(f"Motivo de rejeicao simulada: {invoice.rejection_reason}")
     body_lines = []
     for line in lines:
         body_lines.extend(wrap(line, width=96, break_long_words=False))
@@ -218,7 +218,7 @@ def _draw_additional_info(pdf, width, height, invoice):
 
 
 def _draw_footer(pdf, width):
-    _text(pdf, 24, 36, "CONTROLE MARKETPLACE FISCAL - AMBIENTE DE TESTE | PDF ficticio gerado localmente.", 7)
+    _text(pdf, 24, 36, "CONTROLE FISCAL - AMBIENTE DEMO | PDF simulado gerado localmente.", 7)
     _text(pdf, 24, 25, "Nao usar como documento fiscal real. Nenhum dado real deve ser inserido neste ambiente.", 7, bold=True)
 
 

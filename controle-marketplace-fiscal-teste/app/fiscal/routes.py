@@ -24,7 +24,7 @@ def index():
 def generate_files(invoice_id):
     invoice = db.get_or_404(Invoice, invoice_id)
     NFeService().generate_fake_files(invoice)
-    flash("Arquivos fake gerados.", "success")
+    flash("Arquivos fiscais simulados gerados.", "success")
     return redirect(url_for("fiscal.index"))
 
 
@@ -70,7 +70,7 @@ def _copy_to_local_downloads(file_path):
 
 
 def _download_message(file_type, local_copy_path):
-    base_message = f"Download protegido de {file_type.upper()} fake."
+    base_message = f"Download protegido de {file_type.upper()} simulado."
     if local_copy_path:
         return f"{base_message} Copia local salva em {local_copy_path}."
     return base_message

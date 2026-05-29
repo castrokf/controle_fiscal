@@ -3,8 +3,8 @@
 {% block content %}
 <div class="section-header">
   <div>
-    <h1 class="section-title">{{ 'Editar produto ficticio' if product else 'Novo produto ficticio' }}</h1>
-    <div class="section-subtitle">Organize identificacao, dados fiscais, precos e status do produto.</div>
+    <h1 class="section-title">{{ 'Editar cadastro fiscal' if product else 'Novo cadastro fiscal' }}</h1>
+    <div class="section-subtitle">Organize identificacao, tributacao, precos e disponibilidade do produto.</div>
   </div>
   <a class="btn btn-outline-secondary" href="{{ url_for('products.index') }}"><i class="bi bi-arrow-left"></i> Voltar</a>
 </div>
@@ -16,7 +16,7 @@
     <div class="panel-header">
       <div>
         <h2 class="section-title">Identificacao</h2>
-        <div class="section-subtitle">Dados comerciais usados nos pedidos ficticios.</div>
+        <div class="section-subtitle">Dados comerciais usados nas operacoes simuladas.</div>
       </div>
     </div>
     <div class="row g-3">
@@ -51,7 +51,7 @@
     <div class="panel-header">
       <div>
         <h2 class="section-title">Dados fiscais</h2>
-        <div class="section-subtitle">Campos usados na validacao fiscal simulada.</div>
+        <div class="section-subtitle">Campos usados para conferir classificacao, operacao fiscal e regime tributario.</div>
       </div>
     </div>
     <div class="row g-3">
@@ -84,7 +84,7 @@
         <div class="panel-header">
           <div>
             <h2 class="section-title">Precos</h2>
-            <div class="section-subtitle">Valores ficticios para margem e faturamento.</div>
+            <div class="section-subtitle">Valores simulados para margem e faturamento.</div>
           </div>
         </div>
         <div class="row g-3">
@@ -104,7 +104,7 @@
         <div class="panel-header">
           <div>
             <h2 class="section-title">Status</h2>
-            <div class="section-subtitle">Controle de disponibilidade no ambiente de teste.</div>
+            <div class="section-subtitle">Controle de disponibilidade no ambiente demo.</div>
           </div>
         </div>
         <div class="form-check form-switch">
