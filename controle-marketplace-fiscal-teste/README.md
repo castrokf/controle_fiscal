@@ -296,6 +296,8 @@ LOCAL_DOWNLOAD_COPY_ENABLED=false
 
 O comando `deploy` aplica migrations e executa o seed inicial somente quando o banco ainda nao possui usuario. Isso evita apagar dados em reinicios do servico.
 
+Se `INITIAL_ADMIN_EMAIL` ou `INITIAL_ADMIN_PASSWORD` estiverem ausentes ou invalidos, o deploy nao cria o usuario inicial e registra um aviso no log, mas o Web Service continua subindo. Depois de corrigir as variaveis no Render, rode `Manual Deploy > Clear build cache & deploy` para executar o seed novamente.
+
 Se precisar rodar manualmente no Shell do Render:
 
 ```bash

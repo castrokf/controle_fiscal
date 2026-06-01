@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from app.cli import _initial_admin_config_error
 from app.config import _database_url
 from app.extensions import db
 from app.models import FISCAL_AUTORIZADA, FISCAL_PRONTO, MarketplaceOrder, Product, User
@@ -68,6 +69,24 @@ def test_security_headers_are_applied(client):
 def test_database_url_accepts_render_postgres_scheme(monkeypatch):
     monkeypatch.setenv("DATABASE_URL", "postgres://user:pass@host:5432/dbname")
     assert _database_url() == "postgresql+psycopg2://user:pass@host:5432/dbname"
+
+
+def test_initial_admin_config_validation(app):
+    with app.app_context():
+        app.config["INITIAL_ADMIN_EMAIL"] = ""
+        app.config["INITIAL_ADMIN_PASSWORD"] = ""
+        assert "INITIAL_ADMIN_EMAIL" in _initial_admin_config_error()
+
+        app.config["INITIAL_ADMIN_EMAIL"] = "email-invalido"
+        app.config["INITIAL_ADMIN_PASSWORD"] = "SenhaForte@2026"
+        assert "email valido" in _initial_admin_config_error()
+
+        app.config["INITIAL_ADMIN_EMAIL"] = "usuario.qa@example.com"
+        app.config["INITIAL_ADMIN_PASSWORD"] = "curta"
+        assert "politica de senha" in _initial_admin_config_error()
+
+        app.config["INITIAL_ADMIN_PASSWORD"] = "SenhaForte@2026"
+        assert _initial_admin_config_error() is None
 
 
 def test_create_product(client, app):
