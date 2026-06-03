@@ -5,8 +5,8 @@ from flask_migrate import upgrade
 
 from app.extensions import db
 from app.fake_data import seed_database
-from app.models import User
-from app.security import is_valid_email_format, normalize_email, password_policy_errors
+from app.models import ROLE_ADMIN, User
+from app.security import initial_admin_password_policy_errors, is_valid_email_format, normalize_email
 
 
 @click.command("deploy")
@@ -16,15 +16,31 @@ def deploy_command():
     upgrade()
     click.echo("Migrations aplicadas com sucesso.")
 
-    if not current_app.config.get("ENABLE_AUTO_SEED"):
-        click.echo("Seed automatico desativado.")
-        return
+    config_error = _initial_admin_config_error()
+    has_users = User.query.first() is not None
 
-    if User.query.first():
+    if has_users:
+        if config_error:
+            click.echo("Administrador inicial nao sincronizado: " + config_error, err=True)
+        else:
+            created, email = _sync_initial_admin()
+            action = "criado" if created else "atualizado"
+            click.echo(f"Administrador inicial {action}: {email}")
+
         click.echo("Seed automatico ignorado: o banco ja possui usuario cadastrado.")
         return
 
-    config_error = _initial_admin_config_error()
+    if not current_app.config.get("ENABLE_AUTO_SEED"):
+        if config_error:
+            click.echo("Administrador inicial nao criado: " + config_error, err=True)
+        else:
+            created, email = _sync_initial_admin()
+            action = "criado" if created else "atualizado"
+            click.echo(f"Administrador inicial {action}: {email}")
+
+        click.echo("Seed automatico desativado.")
+        return
+
     if config_error:
         click.echo("Seed inicial nao executado: " + config_error, err=True)
         click.echo(
@@ -52,11 +68,31 @@ def _initial_admin_config_error():
     if not is_valid_email_format(email):
         return "INITIAL_ADMIN_EMAIL precisa ser um email valido."
 
-    errors = password_policy_errors(password)
+    errors = initial_admin_password_policy_errors(password)
     if errors:
         return "INITIAL_ADMIN_PASSWORD nao atende a politica de senha: " + "; ".join(errors) + "."
 
     return None
+
+
+def _sync_initial_admin():
+    name = (current_app.config.get("INITIAL_ADMIN_NAME") or "Administrador").strip() or "Administrador"
+    email = normalize_email(current_app.config.get("INITIAL_ADMIN_EMAIL"))
+    password = current_app.config.get("INITIAL_ADMIN_PASSWORD") or ""
+
+    user = User.query.filter_by(email=email).first()
+    created = user is None
+    if created:
+        user = User(email=email, role=ROLE_ADMIN, is_active=True, name=name)
+        db.session.add(user)
+    else:
+        user.name = name
+        user.role = ROLE_ADMIN
+        user.is_active = True
+
+    user.set_password(password)
+    db.session.commit()
+    return created, email
 
 
 @click.command("reset-admin")
@@ -66,23 +102,7 @@ def reset_admin_command():
     if config_error:
         raise click.ClickException(config_error)
 
-    name = (current_app.config.get("INITIAL_ADMIN_NAME") or "Administrador").strip() or "Administrador"
-    email = normalize_email(current_app.config.get("INITIAL_ADMIN_EMAIL"))
-    password = current_app.config.get("INITIAL_ADMIN_PASSWORD") or ""
-
-    user = User.query.filter_by(email=email).first()
-    created = user is None
-    if created:
-        user = User(email=email, role="admin", is_active=True, name=name)
-        db.session.add(user)
-    else:
-        user.name = name
-        user.role = "admin"
-        user.is_active = True
-
-    user.set_password(password)
-    db.session.commit()
-
+    created, email = _sync_initial_admin()
     action = "criado" if created else "atualizado"
     click.echo(f"Administrador {action}: {email}")
 

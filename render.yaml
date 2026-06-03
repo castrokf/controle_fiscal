@@ -24,9 +24,9 @@ services:
       - key: INITIAL_ADMIN_NAME
         value: "Administrador"
       - key: INITIAL_ADMIN_EMAIL
-        sync: false
+        value: admin@teste.com
       - key: INITIAL_ADMIN_PASSWORD
-        sync: false
+        value: Teste1234
       - key: LOGIN_MAX_ATTEMPTS
         value: "5"
       - key: LOGIN_ATTEMPT_WINDOW_SECONDS

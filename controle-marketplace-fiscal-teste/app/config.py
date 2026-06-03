@@ -13,6 +13,13 @@ def _env_bool(name, default="false"):
     return os.getenv(name, default).strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _env_text(name, default=""):
+    value = os.getenv(name)
+    if value is None or not value.strip():
+        return default
+    return value.strip()
+
+
 def _env_int(name, default):
     value = os.getenv(name, str(default)).strip()
     try:
@@ -70,9 +77,9 @@ class Config:
     AUTO_GENERATE_FAKE_ORDERS = os.getenv("AUTO_GENERATE_FAKE_ORDERS", "false").lower() == "true"
     FAKE_ORDER_INTERVAL_MINUTES = int(os.getenv("FAKE_ORDER_INTERVAL_MINUTES", "10"))
     ENABLE_AUTO_SEED = _env_bool("ENABLE_AUTO_SEED", "false")
-    INITIAL_ADMIN_NAME = os.getenv("INITIAL_ADMIN_NAME", "Administrador")
-    INITIAL_ADMIN_EMAIL = os.getenv("INITIAL_ADMIN_EMAIL", "")
-    INITIAL_ADMIN_PASSWORD = os.getenv("INITIAL_ADMIN_PASSWORD", "")
+    INITIAL_ADMIN_NAME = _env_text("INITIAL_ADMIN_NAME", "Administrador")
+    INITIAL_ADMIN_EMAIL = _env_text("INITIAL_ADMIN_EMAIL", "admin@teste.com")
+    INITIAL_ADMIN_PASSWORD = _env_text("INITIAL_ADMIN_PASSWORD", "Teste1234")
     LOGIN_MAX_ATTEMPTS = _env_int("LOGIN_MAX_ATTEMPTS", 5)
     LOGIN_ATTEMPT_WINDOW_SECONDS = _env_int("LOGIN_ATTEMPT_WINDOW_SECONDS", 300)
     LOGIN_LOCKOUT_SECONDS = _env_int("LOGIN_LOCKOUT_SECONDS", 900)

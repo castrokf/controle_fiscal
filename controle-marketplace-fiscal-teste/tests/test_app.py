@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from app.cli import _initial_admin_config_error
+from app.cli import _initial_admin_config_error, _sync_initial_admin
 from app.config import _database_url
 from app.extensions import db
 from app.models import FISCAL_AUTORIZADA, FISCAL_PRONTO, MarketplaceOrder, Product, User
@@ -85,7 +85,7 @@ def test_initial_admin_config_validation(app):
         app.config["INITIAL_ADMIN_PASSWORD"] = "curta"
         assert "politica de senha" in _initial_admin_config_error()
 
-        app.config["INITIAL_ADMIN_PASSWORD"] = "SenhaForte@2026"
+        app.config["INITIAL_ADMIN_PASSWORD"] = "Teste1234"
         assert _initial_admin_config_error() is None
 
 
@@ -93,7 +93,7 @@ def test_reset_admin_command_creates_or_updates_admin(app):
     runner = app.test_cli_runner()
     with app.app_context():
         app.config["INITIAL_ADMIN_EMAIL"] = "admin@teste.com"
-        app.config["INITIAL_ADMIN_PASSWORD"] = "SenhaForte@2026"
+        app.config["INITIAL_ADMIN_PASSWORD"] = "Teste1234"
 
     result = runner.invoke(args=["reset-admin"])
     assert result.exit_code == 0
@@ -103,7 +103,7 @@ def test_reset_admin_command_creates_or_updates_admin(app):
         assert user is not None
         assert user.role == "admin"
         assert user.is_active is True
-        assert user.check_password("SenhaForte@2026")
+        assert user.check_password("Teste1234")
 
         app.config["INITIAL_ADMIN_PASSWORD"] = "OutraSenha@2026"
 
@@ -119,7 +119,7 @@ def test_reset_admin_command_rejects_weak_password(app):
     runner = app.test_cli_runner()
     with app.app_context():
         app.config["INITIAL_ADMIN_EMAIL"] = "admin@teste.com"
-        app.config["INITIAL_ADMIN_PASSWORD"] = "Teste1234"
+        app.config["INITIAL_ADMIN_PASSWORD"] = "teste1234"
 
     result = runner.invoke(args=["reset-admin"])
     assert result.exit_code != 0
@@ -127,6 +127,24 @@ def test_reset_admin_command_rejects_weak_password(app):
 
     with app.app_context():
         assert User.query.filter_by(email="admin@teste.com").first() is None
+
+
+def test_sync_initial_admin_updates_existing_user(app):
+    with app.app_context():
+        create_user(email="admin@teste.com", password="SenhaAntiga@2026")
+        app.config["INITIAL_ADMIN_NAME"] = "Admin Producao"
+        app.config["INITIAL_ADMIN_EMAIL"] = "admin@teste.com"
+        app.config["INITIAL_ADMIN_PASSWORD"] = "SenhaNova@2026"
+
+        created, email = _sync_initial_admin()
+
+        user = User.query.filter_by(email="admin@teste.com").first()
+        assert created is False
+        assert email == "admin@teste.com"
+        assert user.name == "Admin Producao"
+        assert user.role == "admin"
+        assert user.is_active is True
+        assert user.check_password("SenhaNova@2026")
 
 
 def test_create_product(client, app):

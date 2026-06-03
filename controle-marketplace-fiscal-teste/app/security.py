@@ -36,6 +36,22 @@ def password_policy_errors(password):
     return errors
 
 
+def initial_admin_password_policy_errors(password):
+    errors = []
+    password = password or ""
+    if len(password) < 8:
+        errors.append("use pelo menos 8 caracteres")
+    if len(password.encode("utf-8")) > 72:
+        errors.append("use no maximo 72 bytes por compatibilidade com bcrypt")
+    if not re.search(r"[a-z]", password):
+        errors.append("inclua letra minuscula")
+    if not re.search(r"[A-Z]", password):
+        errors.append("inclua letra maiuscula")
+    if not re.search(r"\d", password):
+        errors.append("inclua numero")
+    return errors
+
+
 def is_safe_redirect_url(target):
     if not target:
         return False

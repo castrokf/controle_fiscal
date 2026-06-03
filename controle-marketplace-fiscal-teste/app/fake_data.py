@@ -29,7 +29,7 @@ from app.models import (
     User,
 )
 from app.fiscal.validators import validate_order
-from app.security import is_valid_email_format, normalize_email, password_policy_errors
+from app.security import initial_admin_password_policy_errors, is_valid_email_format, normalize_email
 
 PRODUCT_NAMES = [
     "Cabo USB Ficticio",
@@ -161,7 +161,7 @@ def _initial_admin_credentials():
     if not is_valid_email_format(email):
         raise RuntimeError("INITIAL_ADMIN_EMAIL precisa ser um email valido.")
 
-    errors = password_policy_errors(password)
+    errors = initial_admin_password_policy_errors(password)
     if errors:
         raise RuntimeError("INITIAL_ADMIN_PASSWORD nao atende a politica de senha: " + "; ".join(errors) + ".")
 

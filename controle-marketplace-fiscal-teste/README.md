@@ -88,11 +88,11 @@ Abra o `.env` e preencha o administrador inicial antes de rodar o seed:
 
 ```env
 INITIAL_ADMIN_NAME=Administrador
-INITIAL_ADMIN_EMAIL=<seu-email@seudominio.com>
-INITIAL_ADMIN_PASSWORD=<sua senha forte privada>
+INITIAL_ADMIN_EMAIL=admin@teste.com
+INITIAL_ADMIN_PASSWORD=Teste1234
 ```
 
-A senha do administrador precisa ter pelo menos 12 caracteres, com letra maiuscula, letra minuscula, numero e caractere especial.
+Para este ambiente demo, o acesso configurado e `admin@teste.com` com senha `Teste1234`. Em producao real, troque por uma senha privada no Environment do Render.
 
 ## Banco de dados
 
@@ -228,7 +228,7 @@ Este MVP e de portfolio/demo tecnica, mas ja possui uma base de seguranca mais s
 
 - senha inicial do admin via variaveis de ambiente, sem senha publica hardcoded;
 - tela de login sem usuario/senha de exemplo;
-- politica minima de senha forte para o admin criado pelo seed;
+- politica minima de senha para o admin demo criado pelo seed;
 - protecao CSRF em formularios;
 - cookies de sessao `HttpOnly`, `SameSite=Lax` e `Secure` em producao;
 - expiracao de CSRF e sessao permanente com tempo controlado;
@@ -262,9 +262,9 @@ No Render:
 2. Acesse `New > Blueprint`.
 3. Conecte o repositório `castrokf/controle_fiscal`.
 4. Selecione o arquivo `render.yaml` na raiz.
-5. Quando o Render pedir variaveis `sync: false`, preencha:
-   - `INITIAL_ADMIN_EMAIL`: seu email de acesso;
-   - `INITIAL_ADMIN_PASSWORD`: uma senha forte privada.
+5. O Blueprint ja define o acesso demo:
+   - `INITIAL_ADMIN_EMAIL`: `admin@teste.com`;
+   - `INITIAL_ADMIN_PASSWORD`: `Teste1234`.
 6. Clique em `Deploy Blueprint`.
 
 Configuracao usada pelo Blueprint:
@@ -286,8 +286,8 @@ Variaveis de ambiente principais:
 ```env
 SECRET_KEY=gerada automaticamente pelo Render
 DATABASE_URL=ligada automaticamente ao PostgreSQL do Render
-INITIAL_ADMIN_EMAIL=preenchida manualmente no Render
-INITIAL_ADMIN_PASSWORD=preenchida manualmente no Render
+INITIAL_ADMIN_EMAIL=admin@teste.com
+INITIAL_ADMIN_PASSWORD=Teste1234
 ENABLE_AUTO_SEED=true
 AUTO_GENERATE_FAKE_ORDERS=false
 FAKE_ORDER_INTERVAL_MINUTES=10
@@ -296,7 +296,7 @@ LOCAL_DOWNLOAD_COPY_ENABLED=false
 
 O comando `deploy` aplica migrations e executa o seed inicial somente quando o banco ainda nao possui usuario. Isso evita apagar dados em reinicios do servico.
 
-Se `INITIAL_ADMIN_EMAIL` ou `INITIAL_ADMIN_PASSWORD` estiverem ausentes ou invalidos, o deploy nao cria o usuario inicial e registra um aviso no log, mas o Web Service continua subindo. Depois de corrigir as variaveis no Render, rode `Manual Deploy > Clear build cache & deploy` para executar o seed novamente.
+Se `INITIAL_ADMIN_EMAIL` ou `INITIAL_ADMIN_PASSWORD` estiverem ausentes, o sistema usa os valores demo `admin@teste.com` e `Teste1234`. Se estiverem invalidos, o deploy registra um aviso no log, mas o Web Service continua subindo.
 
 Se precisar rodar manualmente no Shell do Render:
 
@@ -310,7 +310,7 @@ Para criar ou redefinir o usuario administrador sem apagar dados:
 python -m flask --app run.py reset-admin
 ```
 
-Esse comando usa `INITIAL_ADMIN_EMAIL` e `INITIAL_ADMIN_PASSWORD` configurados no Environment do Render.
+Esse comando usa `INITIAL_ADMIN_EMAIL` e `INITIAL_ADMIN_PASSWORD` configurados no Environment do Render. Para o demo atual, use `admin@teste.com` e `Teste1234`.
 
 Para Render, prefira PostgreSQL. SQLite em hospedagem pode perder dados em reinicio de ambiente.
 
