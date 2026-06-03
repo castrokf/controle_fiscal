@@ -82,9 +82,10 @@ def _register_blueprints(app):
 
 
 def _register_cli(app):
-    from app.cli import deploy_command, seed_command
+    from app.cli import deploy_command, reset_admin_command, seed_command
 
     app.cli.add_command(deploy_command)
+    app.cli.add_command(reset_admin_command)
     app.cli.add_command(seed_command)
 
 

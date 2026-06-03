@@ -89,6 +89,46 @@ def test_initial_admin_config_validation(app):
         assert _initial_admin_config_error() is None
 
 
+def test_reset_admin_command_creates_or_updates_admin(app):
+    runner = app.test_cli_runner()
+    with app.app_context():
+        app.config["INITIAL_ADMIN_EMAIL"] = "admin@teste.com"
+        app.config["INITIAL_ADMIN_PASSWORD"] = "SenhaForte@2026"
+
+    result = runner.invoke(args=["reset-admin"])
+    assert result.exit_code == 0
+
+    with app.app_context():
+        user = User.query.filter_by(email="admin@teste.com").first()
+        assert user is not None
+        assert user.role == "admin"
+        assert user.is_active is True
+        assert user.check_password("SenhaForte@2026")
+
+        app.config["INITIAL_ADMIN_PASSWORD"] = "OutraSenha@2026"
+
+    result = runner.invoke(args=["reset-admin"])
+    assert result.exit_code == 0
+
+    with app.app_context():
+        user = User.query.filter_by(email="admin@teste.com").first()
+        assert user.check_password("OutraSenha@2026")
+
+
+def test_reset_admin_command_rejects_weak_password(app):
+    runner = app.test_cli_runner()
+    with app.app_context():
+        app.config["INITIAL_ADMIN_EMAIL"] = "admin@teste.com"
+        app.config["INITIAL_ADMIN_PASSWORD"] = "Teste1234"
+
+    result = runner.invoke(args=["reset-admin"])
+    assert result.exit_code != 0
+    assert "politica de senha" in result.output
+
+    with app.app_context():
+        assert User.query.filter_by(email="admin@teste.com").first() is None
+
+
 def test_create_product(client, app):
     with app.app_context():
         create_user()

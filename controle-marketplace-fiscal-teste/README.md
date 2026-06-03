@@ -304,6 +304,14 @@ Se precisar rodar manualmente no Shell do Render:
 python -m flask --app run.py deploy
 ```
 
+Para criar ou redefinir o usuario administrador sem apagar dados:
+
+```bash
+python -m flask --app run.py reset-admin
+```
+
+Esse comando usa `INITIAL_ADMIN_EMAIL` e `INITIAL_ADMIN_PASSWORD` configurados no Environment do Render.
+
 Para Render, prefira PostgreSQL. SQLite em hospedagem pode perder dados em reinicio de ambiente.
 
 ## O que mudaria para virar sistema real

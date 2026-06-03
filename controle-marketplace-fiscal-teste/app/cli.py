@@ -3,6 +3,7 @@ from flask import current_app
 from flask.cli import with_appcontext
 from flask_migrate import upgrade
 
+from app.extensions import db
 from app.fake_data import seed_database
 from app.models import User
 from app.security import is_valid_email_format, normalize_email, password_policy_errors
@@ -56,6 +57,34 @@ def _initial_admin_config_error():
         return "INITIAL_ADMIN_PASSWORD nao atende a politica de senha: " + "; ".join(errors) + "."
 
     return None
+
+
+@click.command("reset-admin")
+@with_appcontext
+def reset_admin_command():
+    config_error = _initial_admin_config_error()
+    if config_error:
+        raise click.ClickException(config_error)
+
+    name = (current_app.config.get("INITIAL_ADMIN_NAME") or "Administrador").strip() or "Administrador"
+    email = normalize_email(current_app.config.get("INITIAL_ADMIN_EMAIL"))
+    password = current_app.config.get("INITIAL_ADMIN_PASSWORD") or ""
+
+    user = User.query.filter_by(email=email).first()
+    created = user is None
+    if created:
+        user = User(email=email, role="admin", is_active=True, name=name)
+        db.session.add(user)
+    else:
+        user.name = name
+        user.role = "admin"
+        user.is_active = True
+
+    user.set_password(password)
+    db.session.commit()
+
+    action = "criado" if created else "atualizado"
+    click.echo(f"Administrador {action}: {email}")
 
 
 @click.command("seed")
